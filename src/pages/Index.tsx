@@ -211,8 +211,8 @@ export default function Index() {
               <Link to="/feedbacks">
                 <Button 
                   size="lg" 
-                  variant="outline"
-                  className="gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  variant="ghost"
+                  className="gap-2 bg-primary-foreground/15 border border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
                 >
                   Murojaatlarni ko'rish
                 </Button>
