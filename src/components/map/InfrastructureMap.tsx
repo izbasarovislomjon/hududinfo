@@ -6,10 +6,11 @@ import {
   ObjectType, 
   objectTypeLabels, 
   objectTypeColors 
-} from "@/data/mockData";
+} from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, MessageSquare, MapPin, Building2 } from "lucide-react";
+import "leaflet/dist/leaflet.css";
 
 // Custom marker icons for different object types
 const createCustomIcon = (type: ObjectType) => {
@@ -32,24 +33,15 @@ const createCustomIcon = (type: ObjectType) => {
 
 interface InfrastructureMapProps {
   objects: InfrastructureObject[];
-  selectedTypes: ObjectType[];
-  onObjectSelect: (obj: InfrastructureObject) => void;
   onFeedbackClick: (obj: InfrastructureObject) => void;
 }
 
 export function InfrastructureMap({ 
   objects, 
-  selectedTypes, 
-  onObjectSelect,
   onFeedbackClick 
 }: InfrastructureMapProps) {
   const mapCenter: [number, number] = [41.2995, 69.2401]; // Tashkent center
-  const mapZoom = 12;
-
-  const filteredObjects = useMemo(() => {
-    if (selectedTypes.length === 0) return objects;
-    return objects.filter(obj => selectedTypes.includes(obj.type));
-  }, [objects, selectedTypes]);
+  const mapZoom = 11;
 
   const icons = useMemo(() => {
     const iconMap: Record<ObjectType, L.DivIcon> = {} as Record<ObjectType, L.DivIcon>;
@@ -71,14 +63,11 @@ export function InfrastructureMap({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       
-      {filteredObjects.map((obj) => (
+      {objects.map((obj) => (
         <Marker
           key={obj.id}
-          position={obj.coordinates}
+          position={[obj.lat, obj.lng]}
           icon={icons[obj.type]}
-          eventHandlers={{
-            click: () => onObjectSelect(obj),
-          }}
         >
           <Popup className="custom-popup" minWidth={280} maxWidth={320}>
             <div className="p-1">
@@ -122,23 +111,23 @@ export function InfrastructureMap({
                   <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                   <span className="font-medium">{obj.rating.toFixed(1)}</span>
                   <span className="text-muted-foreground text-xs">
-                    ({obj.totalReviews})
+                    ({obj.total_reviews})
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <MessageSquare className="h-4 w-4" />
-                  <span>{obj.totalFeedbacks} murojaat</span>
+                  <span>{obj.total_feedbacks} murojaat</span>
                 </div>
               </div>
 
               {/* Tags */}
               <div className="flex flex-wrap gap-1.5 mb-3">
-                {obj.isNew && (
+                {obj.is_new && (
                   <Badge className="bg-green-500 text-white text-xs">
                     Yangi
                   </Badge>
                 )}
-                {obj.isReconstructed && (
+                {obj.is_reconstructed && (
                   <Badge className="bg-blue-500 text-white text-xs">
                     Ta'mirlangan
                   </Badge>
