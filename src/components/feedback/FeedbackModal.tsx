@@ -196,11 +196,29 @@ export function FeedbackModal({ open, onOpenChange, selectedObject }: FeedbackMo
           comment: 'Murojaat qabul qilindi',
         });
 
+      // Send SMS notification if phone is provided
+      if (phone && !isAnonymous) {
+        try {
+          await supabase.functions.invoke('send-sms', {
+            body: {
+              phone: phone,
+              message: `Hurmatli ${name || 'foydalanuvchi'}, sizning "${selectedObject.name}" bo'yicha murojaatingiz qabul qilindi. Murojaat raqami: ${feedback.id.slice(0, 8)}. HududInfo.uz`,
+              feedbackId: feedback.id,
+            },
+          });
+        } catch (smsError) {
+          console.error('SMS sending error:', smsError);
+          // Don't fail the whole submission if SMS fails
+        }
+      }
+
       setIsSuccess(true);
       
       toast({
         title: "Murojaat yuborildi!",
-        description: "Sizning murojaatingiz qabul qilindi va ko'rib chiqiladi.",
+        description: phone && !isAnonymous 
+          ? "Sizning murojaatingiz qabul qilindi. SMS xabar yuborildi." 
+          : "Sizning murojaatingiz qabul qilindi va ko'rib chiqiladi.",
       });
 
       // Reset and close after success
@@ -421,7 +439,7 @@ export function FeedbackModal({ open, onOpenChange, selectedObject }: FeedbackMo
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="text-sm font-medium">
-                      Telefon raqamingiz
+                      Telefon raqamingiz (SMS bildirishnoma uchun)
                     </Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -433,6 +451,9 @@ export function FeedbackModal({ open, onOpenChange, selectedObject }: FeedbackMo
                         className="pl-10"
                       />
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Murojaat holati o'zgarganda SMS orqali xabar olasiz
+                    </p>
                   </div>
                 </div>
               )}
