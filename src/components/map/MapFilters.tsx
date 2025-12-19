@@ -1,4 +1,4 @@
-import { ObjectType, objectTypeLabels, objectTypeColors } from "@/data/mockData";
+import { ObjectType, objectTypeLabels, objectTypeColors } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { 
   GraduationCap, 

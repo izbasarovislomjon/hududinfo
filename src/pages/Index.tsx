@@ -1,17 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Header } from "@/components/layout/Header";
 import { MapFilters } from "@/components/map/MapFilters";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { 
-  mockObjects, 
   InfrastructureObject, 
   ObjectType,
-  mockStats,
   objectTypeLabels,
   objectTypeColors
-} from "@/data/mockData";
+} from "@/lib/types";
 import { 
   MessageSquarePlus, 
   TrendingUp, 
@@ -19,14 +18,78 @@ import {
   CheckCircle2,
   Info,
   MapPin,
-  Star
+  Star,
+  Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Index() {
+  const [objects, setObjects] = useState<InfrastructureObject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalFeedbacks: 0,
+    resolvedFeedbacks: 0,
+    satisfactionRate: 78,
+  });
   const [selectedTypes, setSelectedTypes] = useState<ObjectType[]>([]);
   const [selectedObject, setSelectedObject] = useState<InfrastructureObject | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchObjects();
+    fetchStats();
+  }, []);
+
+  const fetchObjects = async () => {
+    const { data, error } = await supabase
+      .from('infrastructure_objects')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('Error fetching objects:', error);
+    } else {
+      const mappedObjects: InfrastructureObject[] = (data || []).map(obj => ({
+        id: obj.id,
+        name: obj.name,
+        type: obj.type as ObjectType,
+        address: obj.address,
+        region: obj.region,
+        district: obj.district,
+        lat: Number(obj.lat),
+        lng: Number(obj.lng),
+        rating: Number(obj.rating) || 0,
+        total_reviews: obj.total_reviews || 0,
+        total_feedbacks: obj.total_feedbacks || 0,
+        is_new: obj.is_new || false,
+        is_reconstructed: obj.is_reconstructed || false,
+        capacity: obj.capacity || undefined,
+        built_year: obj.built_year || undefined,
+        last_renovation: obj.last_renovation || undefined,
+      }));
+      setObjects(mappedObjects);
+    }
+    setLoading(false);
+  };
+
+  const fetchStats = async () => {
+    // Get total feedbacks
+    const { count: totalCount } = await supabase
+      .from('feedbacks')
+      .select('*', { count: 'exact', head: true });
+
+    // Get resolved feedbacks
+    const { count: resolvedCount } = await supabase
+      .from('feedbacks')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'completed');
+
+    setStats({
+      totalFeedbacks: totalCount || 0,
+      resolvedFeedbacks: resolvedCount || 0,
+      satisfactionRate: totalCount && resolvedCount ? Math.round((resolvedCount / totalCount) * 100) : 78,
+    });
+  };
 
   const objectCounts = useMemo(() => {
     const counts: Record<ObjectType, number> = {
@@ -36,16 +99,16 @@ export default function Index() {
       water: 0,
       road: 0,
     };
-    mockObjects.forEach(obj => {
+    objects.forEach(obj => {
       counts[obj.type]++;
     });
     return counts;
-  }, []);
+  }, [objects]);
 
   const filteredObjects = useMemo(() => {
-    if (selectedTypes.length === 0) return mockObjects;
-    return mockObjects.filter(obj => selectedTypes.includes(obj.type));
-  }, [selectedTypes]);
+    if (selectedTypes.length === 0) return objects;
+    return objects.filter(obj => selectedTypes.includes(obj.type));
+  }, [objects, selectedTypes]);
 
   const handleTypeToggle = (type: ObjectType) => {
     setSelectedTypes(prev => 
@@ -57,6 +120,14 @@ export default function Index() {
     setSelectedObject(obj);
     setFeedbackModalOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -109,7 +180,7 @@ export default function Index() {
                 <MessageSquarePlus className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="font-bold text-lg">{mockStats.totalFeedbacks}</p>
+                <p className="font-bold text-lg">{stats.totalFeedbacks}</p>
                 <p className="text-xs text-muted-foreground">Jami murojaatlar</p>
               </div>
             </div>
@@ -118,7 +189,7 @@ export default function Index() {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
               </div>
               <div>
-                <p className="font-bold text-lg">{mockStats.resolvedFeedbacks}</p>
+                <p className="font-bold text-lg">{stats.resolvedFeedbacks}</p>
                 <p className="text-xs text-muted-foreground">Hal qilingan</p>
               </div>
             </div>
@@ -127,7 +198,7 @@ export default function Index() {
                 <TrendingUp className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <p className="font-bold text-lg">{mockStats.satisfactionRate}%</p>
+                <p className="font-bold text-lg">{stats.satisfactionRate}%</p>
                 <p className="text-xs text-muted-foreground">Qoniqish darajasi</p>
               </div>
             </div>
@@ -136,7 +207,7 @@ export default function Index() {
                 <Users className="h-4 w-4 text-yellow-600" />
               </div>
               <div>
-                <p className="font-bold text-lg">{mockObjects.length}</p>
+                <p className="font-bold text-lg">{objects.length}</p>
                 <p className="text-xs text-muted-foreground">Obyektlar</p>
               </div>
             </div>
@@ -199,7 +270,7 @@ export default function Index() {
                           <span className="font-medium">{obj.rating.toFixed(1)}</span>
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {obj.totalFeedbacks} murojaat
+                          {obj.total_feedbacks} murojaat
                         </span>
                       </div>
                     </div>
@@ -214,7 +285,7 @@ export default function Index() {
       <FeedbackModal
         open={feedbackModalOpen}
         onOpenChange={setFeedbackModalOpen}
-        selectedObject={selectedObject || mockObjects[0]}
+        selectedObject={selectedObject || objects[0] || null}
       />
     </div>
   );
