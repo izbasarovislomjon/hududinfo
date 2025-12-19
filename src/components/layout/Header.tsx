@@ -1,15 +1,26 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
   MapPin, 
   Menu, 
   MessageSquarePlus, 
-  BarChart3, 
+  BarChart3,
+  LogIn,
+  LogOut,
   User,
-  LogIn 
+  FileText,
+  Shield
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { href: "/", label: "Xarita", icon: MapPin },
@@ -19,7 +30,14 @@ const navItems = [
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAdmin, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
@@ -61,16 +79,51 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Link to="/admin" className="hidden sm:block">
-            <Button variant="outline" size="sm" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Admin
-            </Button>
-          </Link>
-          <Button size="sm" className="gap-2 hidden sm:flex">
-            <LogIn className="h-4 w-4" />
-            Kirish
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">Profil</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/my-feedbacks')}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Mening murojaatlarim
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin panel
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Chiqish
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/admin/login" className="hidden sm:block">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button size="sm" className="gap-2">
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden sm:inline">Kirish</span>
+                </Button>
+              </Link>
+            </>
+          )}
 
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -111,16 +164,50 @@ export function Header() {
                 </nav>
 
                 <div className="border-t pt-4 mt-4">
-                  <Link to="/admin" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full justify-start gap-3 mb-2">
-                      <BarChart3 className="h-5 w-5" />
-                      Admin panel
-                    </Button>
-                  </Link>
-                  <Button className="w-full justify-start gap-3">
-                    <LogIn className="h-5 w-5" />
-                    Kirish
-                  </Button>
+                  {user ? (
+                    <>
+                      <Link to="/my-feedbacks" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full justify-start gap-3 mb-2">
+                          <FileText className="h-5 w-5" />
+                          Mening murojaatlarim
+                        </Button>
+                      </Link>
+                      {isAdmin && (
+                        <Link to="/admin" onClick={() => setIsOpen(false)}>
+                          <Button variant="outline" className="w-full justify-start gap-3 mb-2">
+                            <Shield className="h-5 w-5" />
+                            Admin panel
+                          </Button>
+                        </Link>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start gap-3"
+                        onClick={() => {
+                          handleSignOut();
+                          setIsOpen(false);
+                        }}
+                      >
+                        <LogOut className="h-5 w-5" />
+                        Chiqish
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/admin/login" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full justify-start gap-3 mb-2">
+                          <Shield className="h-5 w-5" />
+                          Admin panel
+                        </Button>
+                      </Link>
+                      <Link to="/auth" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full justify-start gap-3">
+                          <LogIn className="h-5 w-5" />
+                          Kirish
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>

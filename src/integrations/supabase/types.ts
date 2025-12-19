@@ -14,16 +14,296 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      feedback_images: {
+        Row: {
+          created_at: string | null
+          feedback_id: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          feedback_id: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          created_at?: string | null
+          feedback_id?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_images_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedbacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_status_history: {
+        Row: {
+          changed_by: string | null
+          comment: string | null
+          created_at: string | null
+          feedback_id: string
+          id: string
+          status: Database["public"]["Enums"]["feedback_status"]
+        }
+        Insert: {
+          changed_by?: string | null
+          comment?: string | null
+          created_at?: string | null
+          feedback_id: string
+          id?: string
+          status: Database["public"]["Enums"]["feedback_status"]
+        }
+        Update: {
+          changed_by?: string | null
+          comment?: string | null
+          created_at?: string | null
+          feedback_id?: string
+          id?: string
+          status?: Database["public"]["Enums"]["feedback_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_status_history_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedbacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedbacks: {
+        Row: {
+          admin_comment: string | null
+          author_name: string | null
+          author_phone: string | null
+          created_at: string | null
+          description: string
+          id: string
+          is_anonymous: boolean | null
+          issue_type: Database["public"]["Enums"]["issue_type"]
+          object_id: string
+          status: Database["public"]["Enums"]["feedback_status"] | null
+          updated_at: string | null
+          user_id: string | null
+          votes: number | null
+        }
+        Insert: {
+          admin_comment?: string | null
+          author_name?: string | null
+          author_phone?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          is_anonymous?: boolean | null
+          issue_type: Database["public"]["Enums"]["issue_type"]
+          object_id: string
+          status?: Database["public"]["Enums"]["feedback_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          votes?: number | null
+        }
+        Update: {
+          admin_comment?: string | null
+          author_name?: string | null
+          author_phone?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          is_anonymous?: boolean | null
+          issue_type?: Database["public"]["Enums"]["issue_type"]
+          object_id?: string
+          status?: Database["public"]["Enums"]["feedback_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
+          votes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedbacks_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "infrastructure_objects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      infrastructure_objects: {
+        Row: {
+          address: string
+          built_year: number | null
+          capacity: number | null
+          created_at: string | null
+          district: string
+          id: string
+          is_new: boolean | null
+          is_reconstructed: boolean | null
+          last_renovation: number | null
+          lat: number
+          lng: number
+          name: string
+          rating: number | null
+          region: string
+          total_feedbacks: number | null
+          total_reviews: number | null
+          type: Database["public"]["Enums"]["object_type"]
+        }
+        Insert: {
+          address: string
+          built_year?: number | null
+          capacity?: number | null
+          created_at?: string | null
+          district: string
+          id?: string
+          is_new?: boolean | null
+          is_reconstructed?: boolean | null
+          last_renovation?: number | null
+          lat: number
+          lng: number
+          name: string
+          rating?: number | null
+          region: string
+          total_feedbacks?: number | null
+          total_reviews?: number | null
+          type: Database["public"]["Enums"]["object_type"]
+        }
+        Update: {
+          address?: string
+          built_year?: number | null
+          capacity?: number | null
+          created_at?: string | null
+          district?: string
+          id?: string
+          is_new?: boolean | null
+          is_reconstructed?: boolean | null
+          last_renovation?: number | null
+          lat?: number
+          lng?: number
+          name?: string
+          rating?: number | null
+          region?: string
+          total_feedbacks?: number | null
+          total_reviews?: number | null
+          type?: Database["public"]["Enums"]["object_type"]
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          author_name: string | null
+          comment: string | null
+          created_at: string | null
+          id: string
+          object_id: string
+          rating: number
+          user_id: string | null
+        }
+        Insert: {
+          author_name?: string | null
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          object_id: string
+          rating: number
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string | null
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          object_id?: string
+          rating?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_object_id_fkey"
+            columns: ["object_id"]
+            isOneToOne: false
+            referencedRelation: "infrastructure_objects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      feedback_status:
+        | "submitted"
+        | "reviewing"
+        | "in_progress"
+        | "completed"
+        | "rejected"
+      issue_type:
+        | "water_supply"
+        | "road_condition"
+        | "heating"
+        | "medical_quality"
+        | "staff_shortage"
+        | "infrastructure"
+        | "other"
+      object_type: "school" | "kindergarten" | "clinic" | "water" | "road"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +430,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      feedback_status: [
+        "submitted",
+        "reviewing",
+        "in_progress",
+        "completed",
+        "rejected",
+      ],
+      issue_type: [
+        "water_supply",
+        "road_condition",
+        "heating",
+        "medical_quality",
+        "staff_shortage",
+        "infrastructure",
+        "other",
+      ],
+      object_type: ["school", "kindergarten", "clinic", "water", "road"],
+    },
   },
 } as const
