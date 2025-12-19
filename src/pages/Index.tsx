@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/layout/Header";
-import { InfrastructureMap } from "@/components/map/InfrastructureMap";
 import { MapFilters } from "@/components/map/MapFilters";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
+import { InfrastructureMap } from "@/components/map/InfrastructureMap";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -40,13 +40,9 @@ export default function Index() {
   }, []);
 
   const handleTypeToggle = (type: ObjectType) => {
-    setSelectedTypes(prev => {
-      if (prev.includes(type)) {
-        return prev.filter(t => t !== type);
-      } else {
-        return [...prev, type];
-      }
-    });
+    setSelectedTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
   };
 
   const handleObjectSelect = (obj: InfrastructureObject) => {
@@ -147,7 +143,6 @@ export default function Index() {
       {/* Map Section */}
       <section className="flex-1 py-4 sm:py-6">
         <div className="container-gov h-full flex flex-col gap-4">
-          {/* Filters */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4 text-muted-foreground" />
@@ -162,7 +157,6 @@ export default function Index() {
             />
           </div>
 
-          {/* Map Container */}
           <div className="flex-1 min-h-[500px] lg:min-h-[600px] rounded-xl border shadow-lg overflow-hidden">
             <InfrastructureMap
               objects={mockObjects}
@@ -174,7 +168,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Feedback Modal */}
       <FeedbackModal
         open={feedbackModalOpen}
         onOpenChange={setFeedbackModalOpen}

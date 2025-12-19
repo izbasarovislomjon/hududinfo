@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import { 
@@ -10,14 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, MessageSquare, MapPin, Building2 } from "lucide-react";
-
-// Fix for default marker icons in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
 
 // Custom marker icons for different object types
 const createCustomIcon = (type: ObjectType) => {
@@ -68,6 +60,20 @@ export function InfrastructureMap({
 }: InfrastructureMapProps) {
   const [mapCenter] = useState<[number, number]>([41.2995, 69.2401]); // Tashkent center
   const [mapZoom] = useState(12);
+  const iconsInitialized = useRef(false);
+
+  // Initialize Leaflet default icons once
+  useEffect(() => {
+    if (!iconsInitialized.current) {
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+        iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+      });
+      iconsInitialized.current = true;
+    }
+  }, []);
 
   const filteredObjects = useMemo(() => {
     if (selectedTypes.length === 0) return objects;
