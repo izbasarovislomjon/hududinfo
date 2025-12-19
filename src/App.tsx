@@ -7,12 +7,18 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Feedbacks from "./pages/Feedbacks";
 import Statistics from "./pages/Statistics";
-import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
 import MyFeedbacks from "./pages/MyFeedbacks";
 import NotFound from "./pages/NotFound";
+
+// Admin pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminFeedbacks from "./pages/admin/AdminFeedbacks";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminObjects from "./pages/admin/AdminObjects";
+import AdminStatistics from "./pages/admin/AdminStatistics";
 
 const queryClient = new QueryClient();
 
@@ -31,7 +37,14 @@ const App = () => (
             <Route path="/feedbacks" element={<Feedbacks />} />
             <Route path="/my-feedbacks" element={<MyFeedbacks />} />
             <Route path="/statistics" element={<Statistics />} />
-            <Route path="/admin" element={<Admin />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/feedbacks" element={<AdminFeedbacks />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/objects" element={<AdminObjects />} />
+            <Route path="/admin/statistics" element={<AdminStatistics />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
