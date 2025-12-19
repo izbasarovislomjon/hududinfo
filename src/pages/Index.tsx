@@ -269,20 +269,25 @@ export default function Index() {
       {/* Objects Section */}
       <section className="flex-1 py-4 sm:py-6">
         <div className="container-gov h-full flex flex-col gap-4">
-          <div className="flex flex-col gap-3">
-            {/* Search and filters row */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {/* Search, filters and view toggle row */}
+          <div className="flex flex-col gap-4">
+            {/* Main controls row */}
+            <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center">
+              {/* Search input */}
+              <div className="relative w-full lg:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
-                  placeholder="Maktab, bog'cha yoki manzilni qidiring..."
+                  placeholder="Qidirish..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="pl-10 h-10"
                 />
               </div>
+              
+              {/* District select */}
               <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectTrigger className="w-full lg:w-[200px] h-10">
+                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder="Tumanni tanlang" />
                 </SelectTrigger>
                 <SelectContent>
@@ -293,33 +298,51 @@ export default function Index() {
                   ))}
                 </SelectContent>
               </Select>
-              <MapFilters
-                selectedTypes={selectedTypes}
-                onTypeToggle={handleTypeToggle}
-                objectCounts={objectCounts}
-              />
-            </div>
-            
-            {/* Info row with view toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Info className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  {filteredObjects.length} ta obyekt topildi
-                </span>
+              
+              {/* Type filters */}
+              <div className="flex-1 w-full lg:w-auto">
+                <MapFilters
+                  selectedTypes={selectedTypes}
+                  onTypeToggle={handleTypeToggle}
+                  objectCounts={objectCounts}
+                />
               </div>
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "list" | "map")}>
-                <TabsList className="h-9">
-                  <TabsTrigger value="list" className="gap-1.5 px-3">
+              
+              {/* View toggle */}
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "list" | "map")} className="shrink-0">
+                <TabsList className="h-10">
+                  <TabsTrigger value="list" className="gap-2 px-4 h-8">
                     <List className="h-4 w-4" />
                     <span className="hidden sm:inline">Ro'yxat</span>
                   </TabsTrigger>
-                  <TabsTrigger value="map" className="gap-1.5 px-3">
+                  <TabsTrigger value="map" className="gap-2 px-4 h-8">
                     <Map className="h-4 w-4" />
                     <span className="hidden sm:inline">Xarita</span>
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+            </div>
+            
+            {/* Results info row */}
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Info className="h-4 w-4" />
+                <span><strong className="text-foreground">{filteredObjects.length}</strong> ta obyekt topildi</span>
+              </div>
+              {(searchQuery || selectedTypes.length > 0 || selectedDistrict !== "Barcha tumanlar") && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs h-7"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedTypes([]);
+                    setSelectedDistrict("Barcha tumanlar");
+                  }}
+                >
+                  Filterni tozalash
+                </Button>
+              )}
             </div>
           </div>
 
