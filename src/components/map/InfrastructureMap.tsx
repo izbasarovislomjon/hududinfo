@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useMemo } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { 
   InfrastructureObject, 
@@ -30,21 +30,6 @@ const createCustomIcon = (type: ObjectType) => {
   });
 };
 
-interface MapControllerProps {
-  center: [number, number];
-  zoom: number;
-}
-
-function MapController({ center, zoom }: MapControllerProps) {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-  
-  return null;
-}
-
 interface InfrastructureMapProps {
   objects: InfrastructureObject[];
   selectedTypes: ObjectType[];
@@ -58,22 +43,8 @@ export function InfrastructureMap({
   onObjectSelect,
   onFeedbackClick 
 }: InfrastructureMapProps) {
-  const [mapCenter] = useState<[number, number]>([41.2995, 69.2401]); // Tashkent center
-  const [mapZoom] = useState(12);
-  const iconsInitialized = useRef(false);
-
-  // Initialize Leaflet default icons once
-  useEffect(() => {
-    if (!iconsInitialized.current) {
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-        iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-      });
-      iconsInitialized.current = true;
-    }
-  }, []);
+  const mapCenter: [number, number] = [41.2995, 69.2401]; // Tashkent center
+  const mapZoom = 12;
 
   const filteredObjects = useMemo(() => {
     if (selectedTypes.length === 0) return objects;
@@ -99,7 +70,6 @@ export function InfrastructureMap({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapController center={mapCenter} zoom={mapZoom} />
       
       {filteredObjects.map((obj) => (
         <Marker
@@ -149,7 +119,7 @@ export function InfrastructureMap({
               {/* Stats */}
               <div className="flex items-center gap-4 mb-3 text-sm">
                 <div className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 text-warning fill-warning" />
+                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                   <span className="font-medium">{obj.rating.toFixed(1)}</span>
                   <span className="text-muted-foreground text-xs">
                     ({obj.totalReviews})
@@ -164,12 +134,12 @@ export function InfrastructureMap({
               {/* Tags */}
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {obj.isNew && (
-                  <Badge className="bg-success text-success-foreground text-xs">
+                  <Badge className="bg-green-500 text-white text-xs">
                     Yangi
                   </Badge>
                 )}
                 {obj.isReconstructed && (
-                  <Badge className="bg-info text-info-foreground text-xs">
+                  <Badge className="bg-blue-500 text-white text-xs">
                     Ta'mirlangan
                   </Badge>
                 )}
