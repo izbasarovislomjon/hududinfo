@@ -10,14 +10,17 @@ import { useToast } from '@/hooks/use-toast';
 import { MapPin, Loader2, Mail, Lock, User } from 'lucide-react';
 import { z } from 'zod';
 
-const emailSchema = z.string().email('Noto\'g\'ri email format');
-const passwordSchema = z.string().min(6, 'Parol kamida 6 ta belgidan iborat bo\'lishi kerak');
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const normalizePassword = (value: string) => value.replace(/^password:\s*/i, '').trim();
+
+const emailSchema = z.string().email("Noto'g'ri email format");
+const passwordSchema = z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak");
 
 export default function Auth() {
   const navigate = useNavigate();
   const { user, signUp, signIn } = useAuth();
   const { toast } = useToast();
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,27 +35,30 @@ export default function Auth() {
 
   const validateForm = (isSignUp: boolean) => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
-    
+
+    const emailToValidate = normalizeEmail(email);
+    const passwordToValidate = normalizePassword(password);
+
     try {
-      emailSchema.parse(email);
+      emailSchema.parse(emailToValidate);
     } catch (e) {
       if (e instanceof z.ZodError) {
         newErrors.email = e.errors[0].message;
       }
     }
-    
+
     try {
-      passwordSchema.parse(password);
+      passwordSchema.parse(passwordToValidate);
     } catch (e) {
       if (e instanceof z.ZodError) {
         newErrors.password = e.errors[0].message;
       }
     }
-    
+
     if (isSignUp && !fullName.trim()) {
       newErrors.fullName = 'Ism kiritilishi shart';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -60,17 +66,22 @@ export default function Auth() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm(false)) return;
-    
+
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = normalizePassword(password);
+
+    if (normalizedEmail !== email) setEmail(normalizedEmail);
+    if (normalizedPassword !== password) setPassword(normalizedPassword);
+
     setIsLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(normalizedEmail, normalizedPassword);
     setIsLoading(false);
-    
+
     if (error) {
       toast({
         title: 'Xatolik',
-        description: error.message === 'Invalid login credentials' 
-          ? 'Email yoki parol noto\'g\'ri' 
-          : error.message,
+        description:
+          error.message === 'Invalid login credentials' ? "Email yoki parol noto'g'ri" : error.message,
         variant: 'destructive',
       });
     } else {
@@ -85,15 +96,21 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm(true)) return;
-    
+
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = normalizePassword(password);
+
+    if (normalizedEmail !== email) setEmail(normalizedEmail);
+    if (normalizedPassword !== password) setPassword(normalizedPassword);
+
     setIsLoading(true);
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(normalizedEmail, normalizedPassword, fullName.trim());
     setIsLoading(false);
-    
+
     if (error) {
       let errorMessage = error.message;
       if (error.message.includes('already registered')) {
-        errorMessage = 'Bu email allaqachon ro\'yxatdan o\'tgan';
+        errorMessage = "Bu email allaqachon ro'yxatdan o'tgan";
       }
       toast({
         title: 'Xatolik',
@@ -103,7 +120,7 @@ export default function Auth() {
     } else {
       toast({
         title: 'Muvaffaqiyatli',
-        description: 'Ro\'yxatdan o\'tdingiz!',
+        description: "Ro'yxatdan o'tdingiz!",
       });
       navigate('/');
     }

@@ -8,11 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Loader2, Mail, Lock } from 'lucide-react';
 
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const normalizePassword = (value: string) => value.replace(/^password:\s*/i, '').trim();
+
 export default function AdminLogin() {
   const navigate = useNavigate();
   const { user, isAdmin, signIn } = useAuth();
   const { toast } = useToast();
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,8 +28,14 @@ export default function AdminLogin() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !password) {
+
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = normalizePassword(password);
+
+    if (normalizedEmail !== email) setEmail(normalizedEmail);
+    if (normalizedPassword !== password) setPassword(normalizedPassword);
+
+    if (!normalizedEmail || !normalizedPassword) {
       toast({
         title: 'Xatolik',
         description: 'Email va parol kiritilishi shart',
@@ -34,20 +43,20 @@ export default function AdminLogin() {
       });
       return;
     }
-    
+
     setIsLoading(true);
-    const { error } = await signIn(email, password);
-    
+    const { error } = await signIn(normalizedEmail, normalizedPassword);
+
     if (error) {
       setIsLoading(false);
       toast({
         title: 'Xatolik',
-        description: 'Email yoki parol noto\'g\'ri',
+        description: "Email yoki parol noto'g'ri",
         variant: 'destructive',
       });
       return;
     }
-    
+
     // Check if user is admin after login - will be checked by the useEffect
     setTimeout(() => {
       setIsLoading(false);
