@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,6 +92,41 @@ export default function Auth() {
       });
       navigate('/');
     }
+  };
+
+  const handleForgotPassword = async () => {
+    const normalizedEmail = normalizeEmail(email);
+
+    const parsed = emailSchema.safeParse(normalizedEmail);
+    if (!parsed.success) {
+      setErrors((prev) => ({ ...prev, email: parsed.error.errors[0]?.message ?? "Noto'g'ri email" }));
+      toast({
+        title: 'Email xato',
+        description: "Parolni tiklash uchun to'g'ri email kiriting",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: 'Xatolik',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Yuborildi',
+      description: 'Emailga parolni tiklash havolasi yuborildi',
+    });
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -185,6 +221,18 @@ export default function Auth() {
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Kirish
                 </Button>
+
+                <div className="text-center">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="px-0 text-sm"
+                    onClick={handleForgotPassword}
+                    disabled={isLoading}
+                  >
+                    Parolni unutdingizmi?
+                  </Button>
+                </div>
               </form>
             </TabsContent>
             

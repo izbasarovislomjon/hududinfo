@@ -9,6 +9,7 @@ import Feedbacks from "./pages/Feedbacks";
 import Statistics from "./pages/Statistics";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
 import MyFeedbacks from "./pages/MyFeedbacks";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/feedbacks" element={<Feedbacks />} />
             <Route path="/my-feedbacks" element={<MyFeedbacks />} />
