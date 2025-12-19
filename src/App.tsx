@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
 import MyFeedbacks from "./pages/MyFeedbacks";
+import ObjectDetail from "./pages/ObjectDetail";
 import NotFound from "./pages/NotFound";
 
 // Admin pages
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/feedbacks" element={<Feedbacks />} />
             <Route path="/my-feedbacks" element={<MyFeedbacks />} />
             <Route path="/statistics" element={<Statistics />} />
+            <Route path="/object/:id" element={<ObjectDetail />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />

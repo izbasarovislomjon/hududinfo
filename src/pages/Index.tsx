@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { MapFilters } from "@/components/map/MapFilters";
 import { InfrastructureMap } from "@/components/map/InfrastructureMap";
@@ -6,7 +7,7 @@ import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -32,9 +33,9 @@ import {
   Loader2,
   Search,
   Map,
-  List
+  List,
+  ExternalLink
 } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const TASHKENT_DISTRICTS = [
   "Barcha tumanlar",
@@ -349,42 +350,60 @@ export default function Index() {
                   {filteredObjects.map(obj => (
                     <div 
                       key={obj.id} 
-                      className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer hover:border-primary/50 bg-background"
-                      onClick={() => handleFeedbackClick(obj)}
+                      className="p-4 border rounded-lg hover:shadow-md transition-all hover:border-primary/50 bg-background group"
                     >
-                      <div className="flex items-start gap-3">
-                        <div 
-                          className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: objectTypeColors[obj.type] + "20" }}
-                        >
-                          <MapPin 
-                            className="h-5 w-5" 
-                            style={{ color: objectTypeColors[obj.type] }}
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-medium text-sm line-clamp-1">{obj.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{obj.address}</p>
-                          <div className="flex items-center gap-2 mt-2 flex-wrap">
-                            <Badge 
-                              variant="secondary" 
-                              className="text-xs"
-                              style={{ 
-                                backgroundColor: objectTypeColors[obj.type] + "15",
-                                color: objectTypeColors[obj.type]
-                              }}
-                            >
-                              {objectTypeLabels[obj.type]}
-                            </Badge>
-                            <div className="flex items-center gap-1 text-xs">
-                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                              <span className="font-medium">{obj.rating.toFixed(1)}</span>
+                      <Link to={`/object/${obj.id}`} className="block">
+                        <div className="flex items-start gap-3">
+                          <div 
+                            className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: objectTypeColors[obj.type] + "20" }}
+                          >
+                            <MapPin 
+                              className="h-5 w-5" 
+                              style={{ color: objectTypeColors[obj.type] }}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-sm line-clamp-1 group-hover:text-primary transition-colors">{obj.name}</h3>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{obj.address}</p>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              <Badge 
+                                variant="secondary" 
+                                className="text-xs"
+                                style={{ 
+                                  backgroundColor: objectTypeColors[obj.type] + "15",
+                                  color: objectTypeColors[obj.type]
+                                }}
+                              >
+                                {objectTypeLabels[obj.type]}
+                              </Badge>
+                              <div className="flex items-center gap-1 text-xs">
+                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                <span className="font-medium">{obj.rating.toFixed(1)}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {obj.total_feedbacks} murojaat
+                              </span>
                             </div>
-                            <span className="text-xs text-muted-foreground">
-                              {obj.total_feedbacks} murojaat
-                            </span>
                           </div>
                         </div>
+                      </Link>
+                      <div className="mt-3 pt-3 border-t flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1 text-xs"
+                          onClick={() => handleFeedbackClick(obj)}
+                        >
+                          <MessageSquarePlus className="h-3 w-3 mr-1" />
+                          Murojaat
+                        </Button>
+                        <Link to={`/object/${obj.id}`} className="flex-1">
+                          <Button size="sm" variant="ghost" className="w-full text-xs">
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Batafsil
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   ))}
