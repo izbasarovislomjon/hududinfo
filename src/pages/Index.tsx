@@ -1,10 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
 import { Header } from "@/components/layout/Header";
 import { MapFilters } from "@/components/map/MapFilters";
+import { InfrastructureMap } from "@/components/map/InfrastructureMap";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   InfrastructureObject, 
@@ -21,9 +30,26 @@ import {
   MapPin,
   Star,
   Loader2,
-  Search
+  Search,
+  Map,
+  List
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
+const TASHKENT_DISTRICTS = [
+  "Barcha tumanlar",
+  "Bektemir tumani",
+  "Chilonzor tumani",
+  "Yakkasaroy tumani",
+  "Yunusobod tumani",
+  "Mirzo Ulug'bek tumani",
+  "Mirobod tumani",
+  "Sergeli tumani",
+  "Shayxontohur tumani",
+  "Olmazor tumani",
+  "Uchtepa tumani",
+  "Yashnobod tumani",
+];
 
 export default function Index() {
   const [objects, setObjects] = useState<InfrastructureObject[]>([]);
@@ -35,8 +61,10 @@ export default function Index() {
   });
   const [selectedTypes, setSelectedTypes] = useState<ObjectType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("Barcha tumanlar");
   const [selectedObject, setSelectedObject] = useState<InfrastructureObject | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
   useEffect(() => {
     fetchObjects();
@@ -76,12 +104,10 @@ export default function Index() {
   };
 
   const fetchStats = async () => {
-    // Get total feedbacks
     const { count: totalCount } = await supabase
       .from('feedbacks')
       .select('*', { count: 'exact', head: true });
 
-    // Get resolved feedbacks
     const { count: resolvedCount } = await supabase
       .from('feedbacks')
       .select('*', { count: 'exact', head: true })
@@ -121,13 +147,18 @@ export default function Index() {
       );
     }
     
+    // Filter by district
+    if (selectedDistrict !== "Barcha tumanlar") {
+      result = result.filter(obj => obj.district === selectedDistrict);
+    }
+    
     // Filter by type
     if (selectedTypes.length > 0) {
       result = result.filter(obj => selectedTypes.includes(obj.type));
     }
     
     return result;
-  }, [objects, selectedTypes, searchQuery]);
+  }, [objects, selectedTypes, searchQuery, selectedDistrict]);
 
   const handleTypeToggle = (type: ObjectType) => {
     setSelectedTypes(prev => 
@@ -249,6 +280,18 @@ export default function Index() {
                   className="pl-9"
                 />
               </div>
+              <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Tumanni tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TASHKENT_DISTRICTS.map(district => (
+                    <SelectItem key={district} value={district}>
+                      {district}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <MapFilters
                 selectedTypes={selectedTypes}
                 onTypeToggle={handleTypeToggle}
@@ -256,81 +299,103 @@ export default function Index() {
               />
             </div>
             
-            {/* Info row */}
+            {/* Info row with view toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Info className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
-                  {filteredObjects.length} ta obyekt topildi. Tanlang va murojaat yuboring.
+                  {filteredObjects.length} ta obyekt topildi
                 </span>
               </div>
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "list" | "map")}>
+                <TabsList className="h-9">
+                  <TabsTrigger value="list" className="gap-1.5 px-3">
+                    <List className="h-4 w-4" />
+                    <span className="hidden sm:inline">Ro'yxat</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="map" className="gap-1.5 px-3">
+                    <Map className="h-4 w-4" />
+                    <span className="hidden sm:inline">Xarita</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 
-          {/* Object Grid */}
-          <div className="flex-1 rounded-xl border shadow-lg overflow-hidden bg-card p-4">
-            {filteredObjects.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Search className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                <h3 className="font-medium text-lg mb-2">Hech narsa topilmadi</h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  "{searchQuery}" so'rovi bo'yicha obyekt topilmadi. Boshqa qidiruv so'zini sinab ko'ring.
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedTypes([]);
-                  }}
-                >
-                  Filterni tozalash
-                </Button>
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-h-[60vh] overflow-y-auto">
-                {filteredObjects.map(obj => (
-                  <div 
-                    key={obj.id} 
-                    className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer hover:border-primary/50 bg-background"
-                    onClick={() => handleFeedbackClick(obj)}
+          {/* Content based on view mode */}
+          <div className="flex-1 rounded-xl border shadow-lg overflow-hidden bg-card">
+            {viewMode === "list" ? (
+              filteredObjects.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center p-4">
+                  <Search className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <h3 className="font-medium text-lg mb-2">Hech narsa topilmadi</h3>
+                  <p className="text-sm text-muted-foreground max-w-md">
+                    Qidiruv natijasi topilmadi. Boshqa filtrlarni sinab ko'ring.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedTypes([]);
+                      setSelectedDistrict("Barcha tumanlar");
+                    }}
                   >
-                    <div className="flex items-start gap-3">
-                      <div 
-                        className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: objectTypeColors[obj.type] + "20" }}
-                      >
-                        <MapPin 
-                          className="h-5 w-5" 
-                          style={{ color: objectTypeColors[obj.type] }}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-medium text-sm line-clamp-1">{obj.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{obj.address}</p>
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge 
-                            variant="secondary" 
-                            className="text-xs"
-                            style={{ 
-                              backgroundColor: objectTypeColors[obj.type] + "15",
-                              color: objectTypeColors[obj.type]
-                            }}
-                          >
-                            {objectTypeLabels[obj.type]}
-                          </Badge>
-                          <div className="flex items-center gap-1 text-xs">
-                            <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                            <span className="font-medium">{obj.rating.toFixed(1)}</span>
+                    Filterni tozalash
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-h-[60vh] overflow-y-auto p-4">
+                  {filteredObjects.map(obj => (
+                    <div 
+                      key={obj.id} 
+                      className="p-4 border rounded-lg hover:shadow-md transition-all cursor-pointer hover:border-primary/50 bg-background"
+                      onClick={() => handleFeedbackClick(obj)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div 
+                          className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: objectTypeColors[obj.type] + "20" }}
+                        >
+                          <MapPin 
+                            className="h-5 w-5" 
+                            style={{ color: objectTypeColors[obj.type] }}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-sm line-clamp-1">{obj.name}</h3>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{obj.address}</p>
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <Badge 
+                              variant="secondary" 
+                              className="text-xs"
+                              style={{ 
+                                backgroundColor: objectTypeColors[obj.type] + "15",
+                                color: objectTypeColors[obj.type]
+                              }}
+                            >
+                              {objectTypeLabels[obj.type]}
+                            </Badge>
+                            <div className="flex items-center gap-1 text-xs">
+                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                              <span className="font-medium">{obj.rating.toFixed(1)}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {obj.total_feedbacks} murojaat
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {obj.total_feedbacks} murojaat
-                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )
+            ) : (
+              <div className="h-[60vh]">
+                <InfrastructureMap 
+                  objects={filteredObjects}
+                  onFeedbackClick={handleFeedbackClick}
+                />
               </div>
             )}
           </div>
