@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Feedbacks from "./pages/Feedbacks";
 import Statistics from "./pages/Statistics";
 import PriorityRanking from "./pages/PriorityRanking";
+import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/feedbacks" element={<Feedbacks />} />
             <Route path="/my-feedbacks" element={<MyFeedbacks />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/priority" element={<PriorityRanking />} />
             <Route path="/object/:id" element={<ObjectDetail />} />
