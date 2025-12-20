@@ -3,6 +3,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,16 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, School, Building, Stethoscope, Droplets, Navigation, Star } from "lucide-react";
+import { Search, School, Building, Stethoscope, Droplets, Navigation, Star, MapPin } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { ObjectEditModal } from "@/components/admin/ObjectEditModal";
 
 type ObjectType = Database["public"]["Enums"]["object_type"];
 
@@ -31,6 +26,8 @@ interface InfrastructureObject {
   address: string;
   district: string;
   region: string;
+  lat: number;
+  lng: number;
   rating: number | null;
   total_feedbacks: number | null;
   capacity: number | null;
@@ -66,6 +63,8 @@ export default function AdminObjects() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<ObjectType | "all">("all");
+  const [editingObject, setEditingObject] = useState<InfrastructureObject | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   useEffect(() => {
     fetchObjects();
@@ -174,7 +173,7 @@ export default function AdminObjects() {
                     <TableHead>Manzil</TableHead>
                     <TableHead>Reyting</TableHead>
                     <TableHead>Murojaatlar</TableHead>
-                    <TableHead>Sig'imi</TableHead>
+                    <TableHead>Amallar</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -219,7 +218,20 @@ export default function AdminObjects() {
                             )}
                           </TableCell>
                           <TableCell>{obj.total_feedbacks || 0}</TableCell>
-                          <TableCell>{obj.capacity || "—"}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingObject(obj);
+                                setEditModalOpen(true);
+                              }}
+                              className="gap-1"
+                            >
+                              <MapPin className="h-3 w-3" />
+                              Joylashuv
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       );
                     })
@@ -229,6 +241,13 @@ export default function AdminObjects() {
             </div>
           </CardContent>
         </Card>
+
+        <ObjectEditModal
+          object={editingObject}
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          onSaved={fetchObjects}
+        />
       </div>
     </AdminLayout>
   );
