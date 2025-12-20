@@ -10,7 +10,8 @@ import {
   LogOut,
   User,
   FileText,
-  Shield
+  Shield,
+  Trophy
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,6 +26,7 @@ import {
 const navItems = [
   { href: "/", label: "Xarita", icon: MapPin },
   { href: "/feedbacks", label: "Murojaatlar", icon: MessageSquarePlus },
+  { href: "/priority", label: "Ustuvorlik", icon: Trophy },
   { href: "/statistics", label: "Statistika", icon: BarChart3 },
 ];
 

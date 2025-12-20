@@ -34,7 +34,8 @@ import {
   Search,
   Map,
   List,
-  ExternalLink
+  ExternalLink,
+  Trophy
 } from "lucide-react";
 
 const TASHKENT_DISTRICTS = [
@@ -215,6 +216,16 @@ export default function Index() {
                   className="gap-2 bg-primary-foreground/15 border border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
                 >
                   Murojaatlarni ko'rish
+                </Button>
+              </Link>
+              <Link to="/priority">
+                <Button 
+                  size="lg" 
+                  variant="ghost"
+                  className="gap-2 bg-primary-foreground/15 border border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
+                >
+                  <Trophy className="h-5 w-5" />
+                  Ustuvorlik reytingi
                 </Button>
               </Link>
             </div>

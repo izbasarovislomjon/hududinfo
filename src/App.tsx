@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Feedbacks from "./pages/Feedbacks";
 import Statistics from "./pages/Statistics";
+import PriorityRanking from "./pages/PriorityRanking";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/feedbacks" element={<Feedbacks />} />
             <Route path="/my-feedbacks" element={<MyFeedbacks />} />
             <Route path="/statistics" element={<Statistics />} />
+            <Route path="/priority" element={<PriorityRanking />} />
             <Route path="/object/:id" element={<ObjectDetail />} />
             
             {/* Admin Routes */}
