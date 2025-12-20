@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
-  MapPin, 
+  Home, 
   Menu, 
   MessageSquarePlus, 
   BarChart3,
@@ -11,7 +11,8 @@ import {
   User,
   FileText,
   Shield,
-  Trophy
+  Trophy,
+  Building2
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const navItems = [
-  { href: "/", label: "Xarita", icon: MapPin },
+  { href: "/", label: "Asosiy", icon: Home },
   { href: "/feedbacks", label: "Murojaatlar", icon: MessageSquarePlus },
   { href: "/priority", label: "Ustuvorlik", icon: Trophy },
   { href: "/statistics", label: "Statistika", icon: BarChart3 },
@@ -47,7 +48,7 @@ export function Header() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <MapPin className="h-5 w-5 text-primary-foreground" />
+            <Building2 className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold leading-tight text-foreground">
@@ -90,6 +91,10 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="h-4 w-4 mr-2" />
+                  Profilim
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/my-feedbacks')}>
                   <FileText className="h-4 w-4 mr-2" />
                   Mening murojaatlarim
@@ -138,7 +143,7 @@ export function Header() {
               <div className="flex flex-col gap-4 mt-8">
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                    <MapPin className="h-5 w-5 text-primary-foreground" />
+                    <Building2 className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <span className="text-lg font-bold">HududInfo.uz</span>
                 </div>

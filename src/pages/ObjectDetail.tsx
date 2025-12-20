@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
+import { StarRating } from "@/components/rating/StarRating";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { 
   InfrastructureObject, 
   ObjectType,
@@ -27,7 +31,8 @@ import {
   Loader2,
   MessageSquarePlus,
   Clock,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Send
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -51,6 +56,8 @@ interface Review {
 
 export default function ObjectDetail() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [object, setObject] = useState<InfrastructureObject | null>(null);
   const [feedbacks, setFeedbacks] = useState<FeedbackWithImages[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -58,6 +65,11 @@ export default function ObjectDetail() {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [selectedFeedbackImages, setSelectedFeedbackImages] = useState<string[]>([]);
+  
+  // Review form state
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -154,6 +166,54 @@ export default function ObjectDetail() {
   const openImageGallery = (images: string[], index: number) => {
     setSelectedFeedbackImages(images);
     setSelectedImageIndex(index);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!user) {
+      toast({
+        title: "Kirish kerak",
+        description: "Sharh qoldirish uchun tizimga kiring",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newRating === 0) {
+      toast({
+        title: "Reyting tanlang",
+        description: "Iltimos, yulduzchalarni bosib reyting bering",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmittingReview(true);
+
+    const { error } = await supabase.from('reviews').insert({
+      object_id: id,
+      user_id: user.id,
+      rating: newRating,
+      comment: newComment || null,
+      author_name: user.email?.split('@')[0] || "Foydalanuvchi",
+    });
+
+    if (error) {
+      toast({
+        title: "Xatolik",
+        description: "Sharh qo'shishda xatolik yuz berdi",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Muvaffaqiyat",
+        description: "Sharhingiz qo'shildi!",
+      });
+      setNewRating(0);
+      setNewComment("");
+      fetchObjectDetails(); // Refresh data
+    }
+
+    setSubmittingReview(false);
   };
 
   if (loading) {
@@ -338,12 +398,55 @@ export default function ObjectDetail() {
               </CardContent>
             </Card>
 
+            {/* Add Review Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5" />
+                  Sharh qoldirish
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Reyting bering:</p>
+                    <StarRating
+                      rating={newRating}
+                      size="lg"
+                      interactive
+                      onRatingChange={setNewRating}
+                    />
+                  </div>
+                  <div>
+                    <Textarea
+                      placeholder="Sharh yozing (ixtiyoriy)..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleSubmitReview} 
+                    disabled={submittingReview || newRating === 0}
+                    className="w-full gap-2"
+                  >
+                    {submittingReview ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    Sharh yuborish
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Reviews */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Star className="h-5 w-5" />
-                  Sharhlar
+                  Sharhlar ({reviews.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -356,18 +459,7 @@ export default function ObjectDetail() {
                     {reviews.map((review) => (
                       <div key={review.id} className="p-4 border rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-4 w-4 ${
-                                  star <= review.rating
-                                    ? "text-yellow-500 fill-yellow-500"
-                                    : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                          </div>
+                          <StarRating rating={review.rating} size="sm" />
                           <span className="text-sm font-medium">{review.rating}/5</span>
                         </div>
                         {review.comment && (
@@ -397,16 +489,7 @@ export default function ObjectDetail() {
                 <div className="text-center mb-4">
                   <div className="text-4xl font-bold mb-1">{object.rating.toFixed(1)}</div>
                   <div className="flex justify-center mb-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-5 w-5 ${
-                          star <= Math.round(object.rating)
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
+                    <StarRating rating={object.rating} size="md" />
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {object.total_reviews} ta sharh asosida
