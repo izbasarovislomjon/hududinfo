@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
-import { FeedbackCard } from "@/components/feedback/FeedbackCard";
-import { FeedbackDetailModal } from "@/components/feedback/FeedbackDetailModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,49 +11,80 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 import { 
-  mockFeedbacks, 
-  Feedback, 
   FeedbackStatus, 
   IssueType,
   statusLabels,
   issueTypeLabels 
-} from "@/data/mockData";
-import { Search, Filter, SlidersHorizontal } from "lucide-react";
+} from "@/lib/types";
+import { Search, Filter, SlidersHorizontal, ThumbsUp, Clock, MessageSquare, Loader2 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { uz } from "date-fns/locale";
+
+interface FeedbackItem {
+  id: string;
+  issue_type: IssueType;
+  description: string;
+  status: FeedbackStatus;
+  votes: number;
+  is_anonymous: boolean;
+  author_name: string | null;
+  created_at: string;
+  object_name: string;
+}
 
 export default function Feedbacks() {
-  const [feedbacks, setFeedbacks] = useState<Feedback[]>(mockFeedbacks);
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">("all");
   const [typeFilter, setTypeFilter] = useState<IssueType | "all">("all");
-  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+  const fetchFeedbacks = async () => {
+    setLoading(true);
+    
+    const { data, error } = await supabase
+      .from('feedbacks')
+      .select(`
+        id,
+        issue_type,
+        description,
+        status,
+        votes,
+        is_anonymous,
+        author_name,
+        created_at,
+        infrastructure_objects (name)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching feedbacks:', error);
+    } else if (data) {
+      setFeedbacks(data.map(f => ({
+        ...f,
+        issue_type: f.issue_type as IssueType,
+        status: (f.status || 'submitted') as FeedbackStatus,
+        votes: f.votes || 0,
+        object_name: f.infrastructure_objects?.name || "Noma'lum"
+      })));
+    }
+    
+    setLoading(false);
+  };
 
   const filteredFeedbacks = feedbacks.filter(fb => {
     const matchesSearch = fb.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          fb.objectName.toLowerCase().includes(searchQuery.toLowerCase());
+                          fb.object_name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || fb.status === statusFilter;
-    const matchesType = typeFilter === "all" || fb.issueType === typeFilter;
+    const matchesType = typeFilter === "all" || fb.issue_type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
   });
-
-  const handleVote = (id: string) => {
-    setFeedbacks(prev => prev.map(fb => {
-      if (fb.id === id) {
-        return {
-          ...fb,
-          votes: fb.hasVoted ? fb.votes - 1 : fb.votes + 1,
-          hasVoted: !fb.hasVoted,
-        };
-      }
-      return fb;
-    }));
-  };
-
-  const handleViewDetails = (feedback: Feedback) => {
-    setSelectedFeedback(feedback);
-    setDetailModalOpen(true);
-  };
 
   const statusCounts = {
     all: feedbacks.length,
@@ -63,6 +93,17 @@ export default function Feedbacks() {
     in_progress: feedbacks.filter(f => f.status === 'in_progress').length,
     completed: feedbacks.filter(f => f.status === 'completed').length,
     rejected: feedbacks.filter(f => f.status === 'rejected').length,
+  };
+
+  const getStatusColor = (status: FeedbackStatus) => {
+    const colors: Record<FeedbackStatus, string> = {
+      submitted: "bg-yellow-500/10 text-yellow-700 border-yellow-200",
+      reviewing: "bg-blue-500/10 text-blue-700 border-blue-200",
+      in_progress: "bg-purple-500/10 text-purple-700 border-purple-200",
+      completed: "bg-green-500/10 text-green-700 border-green-200",
+      rejected: "bg-red-500/10 text-red-700 border-red-200",
+    };
+    return colors[status] || "bg-gray-500/10 text-gray-700";
   };
 
   return (
@@ -76,7 +117,7 @@ export default function Feedbacks() {
             Fuqarolar murojaatlari
           </h1>
           <p className="text-muted-foreground">
-            Barcha murojaatlarni ko'ring, ovoz bering va holatini kuzating
+            Foydalanuvchilar tomonidan yuborilgan murojaatlar
           </p>
         </div>
       </section>
@@ -154,32 +195,75 @@ export default function Feedbacks() {
       {/* Feedbacks List */}
       <section className="py-6">
         <div className="container-gov">
-          {filteredFeedbacks.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : feedbacks.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-semibold mb-2">Hali murojaatlar yo'q</h3>
+                <p className="text-sm text-muted-foreground">
+                  Fuqarolar murojaat yuborgandan so'ng bu yerda ko'rinadi
+                </p>
+              </CardContent>
+            </Card>
+          ) : filteredFeedbacks.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Murojaatlar topilmadi</p>
+              <p className="text-muted-foreground">Filtr bo'yicha murojaatlar topilmadi</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredFeedbacks.map((feedback) => (
-                <FeedbackCard
-                  key={feedback.id}
-                  feedback={feedback}
-                  onVote={handleVote}
-                  onViewDetails={handleViewDetails}
-                />
+                <Card key={feedback.id} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <Badge variant="outline" className="text-xs">
+                        {issueTypeLabels[feedback.issue_type]}
+                      </Badge>
+                      <Badge className={`text-xs ${getStatusColor(feedback.status)}`}>
+                        {statusLabels[feedback.status]}
+                      </Badge>
+                    </div>
+
+                    {/* Object name */}
+                    <p className="font-medium text-sm mb-2 line-clamp-1">
+                      {feedback.object_name}
+                    </p>
+
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+                      {feedback.description}
+                    </p>
+
+                    {/* Meta */}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                          <ThumbsUp className="h-3 w-3" />
+                          {feedback.votes}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatDistanceToNow(new Date(feedback.created_at), { 
+                            addSuffix: true,
+                            locale: uz 
+                          })}
+                        </span>
+                      </div>
+                      <span>
+                        {feedback.is_anonymous ? "Anonim" : feedback.author_name || "Foydalanuvchi"}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
         </div>
       </section>
-
-      {/* Detail Modal */}
-      <FeedbackDetailModal
-        open={detailModalOpen}
-        onOpenChange={setDetailModalOpen}
-        feedback={selectedFeedback}
-        onVote={handleVote}
-      />
     </div>
   );
 }

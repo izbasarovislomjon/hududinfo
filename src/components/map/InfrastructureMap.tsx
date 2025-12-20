@@ -107,13 +107,20 @@ export function InfrastructureMap({
 
               {/* Stats */}
               <div className="flex items-center gap-4 mb-3 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                  <span className="font-medium">{obj.rating.toFixed(1)}</span>
-                  <span className="text-muted-foreground text-xs">
-                    ({obj.total_reviews})
-                  </span>
-                </div>
+                {obj.rating > 0 ? (
+                  <div className="flex items-center gap-1.5">
+                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                    <span className="font-medium">{obj.rating.toFixed(1)}</span>
+                    <span className="text-muted-foreground text-xs">
+                      ({obj.total_reviews})
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Star className="h-4 w-4" />
+                    <span className="text-xs">Reyting yo'q</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <MessageSquare className="h-4 w-4" />
                   <span>{obj.total_feedbacks} murojaat</span>
