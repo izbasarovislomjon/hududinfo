@@ -411,10 +411,17 @@ export default function Index() {
                               >
                                 {objectTypeLabels[obj.type]}
                               </Badge>
-                              <div className="flex items-center gap-1 text-xs">
-                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                                <span className="font-medium">{obj.rating.toFixed(1)}</span>
-                              </div>
+                              {obj.rating > 0 ? (
+                                <div className="flex items-center gap-1 text-xs">
+                                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                  <span className="font-medium">{obj.rating.toFixed(1)}</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Star className="h-3 w-3" />
+                                  <span>Reyting yo'q</span>
+                                </div>
+                              )}
                               <span className="text-xs text-muted-foreground">
                                 {obj.total_feedbacks} murojaat
                               </span>
