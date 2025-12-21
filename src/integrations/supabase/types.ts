@@ -256,6 +256,70 @@ export type Database = {
           },
         ]
       }
+      solution_rating_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          solution_rating_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          solution_rating_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          solution_rating_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solution_rating_images_solution_rating_id_fkey"
+            columns: ["solution_rating_id"]
+            isOneToOne: false
+            referencedRelation: "solution_ratings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solution_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          feedback_id: string
+          id: string
+          rating: number
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          feedback_id: string
+          id?: string
+          rating: number
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          feedback_id?: string
+          id?: string
+          rating?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solution_ratings_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedbacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
+import { SolutionRatingModal } from "@/components/feedback/SolutionRatingModal";
+import { SolutionRatingCard } from "@/components/feedback/SolutionRatingCard";
 import { StarRating } from "@/components/rating/StarRating";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,9 +34,18 @@ import {
   MessageSquarePlus,
   Clock,
   Image as ImageIcon,
-  Send
+  Send,
+  CheckCircle2
 } from "lucide-react";
 import { format } from "date-fns";
+
+interface SolutionRating {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  images: { image_url: string }[];
+}
 
 interface FeedbackWithImages {
   id: string;
@@ -44,6 +55,7 @@ interface FeedbackWithImages {
   created_at: string;
   votes: number;
   images: { image_url: string }[];
+  solution_ratings: SolutionRating[];
 }
 
 interface Review {
@@ -63,6 +75,8 @@ export default function ObjectDetail() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [solutionRatingModalOpen, setSolutionRatingModalOpen] = useState(false);
+  const [selectedFeedbackForRating, setSelectedFeedbackForRating] = useState<FeedbackWithImages | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [selectedFeedbackImages, setSelectedFeedbackImages] = useState<string[]>([]);
   
@@ -113,7 +127,7 @@ export default function ObjectDetail() {
     };
     setObject(mappedObject);
 
-    // Fetch feedbacks with images
+    // Fetch feedbacks with images and solution ratings
     const { data: feedbackData } = await supabase
       .from('feedbacks')
       .select(`
@@ -123,7 +137,14 @@ export default function ObjectDetail() {
         status,
         created_at,
         votes,
-        feedback_images (image_url)
+        feedback_images (image_url),
+        solution_ratings (
+          id,
+          rating,
+          comment,
+          created_at,
+          solution_rating_images (image_url)
+        )
       `)
       .eq('object_id', id)
       .order('created_at', { ascending: false })
@@ -133,7 +154,11 @@ export default function ObjectDetail() {
       setFeedbacks(feedbackData.map(f => ({
         ...f,
         status: f.status as FeedbackStatus,
-        images: f.feedback_images || []
+        images: f.feedback_images || [],
+        solution_ratings: (f.solution_ratings || []).map((sr: any) => ({
+          ...sr,
+          images: sr.solution_rating_images || []
+        }))
       })));
     }
 
@@ -348,8 +373,8 @@ export default function ObjectDetail() {
                 ) : (
                   <div className="space-y-4">
                     {feedbacks.map((feedback) => (
-                      <div key={feedback.id} className="p-4 border rounded-lg">
-                        <div className="flex items-start justify-between gap-4 mb-2">
+                      <div key={feedback.id} className="p-4 border rounded-lg space-y-3">
+                        <div className="flex items-start justify-between gap-4">
                           <Badge variant="outline">
                             {issueTypeLabels[feedback.issue_type as keyof typeof issueTypeLabels]}
                           </Badge>
@@ -357,13 +382,13 @@ export default function ObjectDetail() {
                             {statusLabels[feedback.status]}
                           </Badge>
                         </div>
-                        <p className="text-sm text-foreground mb-2 line-clamp-2">
+                        <p className="text-sm text-foreground line-clamp-2">
                           {feedback.description}
                         </p>
                         
                         {/* Images */}
                         {feedback.images.length > 0 && (
-                          <div className="flex gap-2 mb-2">
+                          <div className="flex gap-2">
                             {feedback.images.slice(0, 3).map((img, idx) => (
                               <img
                                 key={idx}
@@ -384,13 +409,48 @@ export default function ObjectDetail() {
                           </div>
                         )}
                         
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {format(new Date(feedback.created_at), 'dd.MM.yyyy')}
-                          </span>
-                          <span>{feedback.votes} ovoz</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {format(new Date(feedback.created_at), 'dd.MM.yyyy')}
+                            </span>
+                            <span>{feedback.votes} ovoz</span>
+                          </div>
+                          
+                          {/* Rate solution button for completed feedbacks */}
+                          {feedback.status === 'completed' && user && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1 text-green-600 border-green-200 hover:bg-green-50"
+                              onClick={() => {
+                                setSelectedFeedbackForRating(feedback);
+                                setSolutionRatingModalOpen(true);
+                              }}
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              Yechimni baholash
+                            </Button>
+                          )}
                         </div>
+
+                        {/* Solution ratings */}
+                        {feedback.solution_ratings && feedback.solution_ratings.length > 0 && (
+                          <div className="pt-2 border-t space-y-2">
+                            <p className="text-xs font-medium text-green-700 flex items-center gap-1">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Fuqarolar baholari ({feedback.solution_ratings.length})
+                            </p>
+                            {feedback.solution_ratings.slice(0, 2).map((sr) => (
+                              <SolutionRatingCard
+                                key={sr.id}
+                                rating={sr}
+                                onImageClick={openImageGallery}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -573,6 +633,16 @@ export default function ObjectDetail() {
         onOpenChange={setFeedbackModalOpen}
         selectedObject={object}
       />
+
+      {selectedFeedbackForRating && (
+        <SolutionRatingModal
+          open={solutionRatingModalOpen}
+          onOpenChange={setSolutionRatingModalOpen}
+          feedbackId={selectedFeedbackForRating.id}
+          feedbackDescription={selectedFeedbackForRating.description}
+          onSuccess={fetchObjectDetails}
+        />
+      )}
     </div>
   );
 }
