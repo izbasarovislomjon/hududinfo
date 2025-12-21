@@ -14,7 +14,9 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  LineChart,
+  Line
 } from "recharts";
 import { 
   MessageSquare, 
@@ -23,7 +25,9 @@ import {
   ThumbsUp,
   AlertCircle,
   Loader2,
-  Building2
+  Building2,
+  Star,
+  TrendingUp
 } from "lucide-react";
 
 const COLORS = ['#3b82f6', '#06b6d4', '#f59e0b', '#ef4444', '#a855f7', '#22c55e', '#64748b'];
@@ -35,6 +39,8 @@ interface Stats {
   totalVotes: number;
   totalObjects: number;
   totalReviews: number;
+  totalSolutionRatings: number;
+  avgSolutionRating: number;
 }
 
 interface TypeData {
@@ -47,6 +53,12 @@ interface DistrictData {
   value: number;
 }
 
+interface StatusData {
+  name: string;
+  value: number;
+  color: string;
+}
+
 export default function Statistics() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
@@ -56,9 +68,12 @@ export default function Statistics() {
     totalVotes: 0,
     totalObjects: 0,
     totalReviews: 0,
+    totalSolutionRatings: 0,
+    avgSolutionRating: 0,
   });
   const [typeData, setTypeData] = useState<TypeData[]>([]);
   const [districtData, setDistrictData] = useState<DistrictData[]>([]);
+  const [statusData, setStatusData] = useState<StatusData[]>([]);
 
   useEffect(() => {
     fetchStatistics();
@@ -83,11 +98,26 @@ export default function Statistics() {
         .from('reviews')
         .select('*', { count: 'exact', head: true });
 
+      // Fetch solution ratings
+      const { data: solutionRatings } = await supabase
+        .from('solution_ratings')
+        .select('rating');
+
       if (feedbacks) {
         const total = feedbacks.length;
         const resolved = feedbacks.filter(f => f.status === 'completed').length;
         const pending = feedbacks.filter(f => f.status !== 'completed' && f.status !== 'rejected').length;
         const votes = feedbacks.reduce((sum, f) => sum + (f.votes || 0), 0);
+        const reviewing = feedbacks.filter(f => f.status === 'reviewing').length;
+        const inProgress = feedbacks.filter(f => f.status === 'in_progress').length;
+        const submitted = feedbacks.filter(f => f.status === 'submitted').length;
+        const rejected = feedbacks.filter(f => f.status === 'rejected').length;
+
+        // Calculate solution rating stats
+        const totalSolutionRatings = solutionRatings?.length || 0;
+        const avgSolutionRating = totalSolutionRatings > 0
+          ? solutionRatings!.reduce((sum, r) => sum + r.rating, 0) / totalSolutionRatings
+          : 0;
 
         setStats({
           totalFeedbacks: total,
@@ -96,7 +126,18 @@ export default function Statistics() {
           totalVotes: votes,
           totalObjects: objects?.length || 0,
           totalReviews: reviewsCount || 0,
+          totalSolutionRatings,
+          avgSolutionRating,
         });
+
+        // Status distribution
+        setStatusData([
+          { name: "Qabul qilindi", value: submitted, color: "#eab308" },
+          { name: "Ko'rib chiqilmoqda", value: reviewing, color: "#3b82f6" },
+          { name: "Amalga oshirilmoqda", value: inProgress, color: "#a855f7" },
+          { name: "Bajarildi", value: resolved, color: "#22c55e" },
+          { name: "Rad etildi", value: rejected, color: "#ef4444" },
+        ].filter(s => s.value > 0));
 
         // Group by issue type
         const typeGroups: Record<string, number> = {};
@@ -119,7 +160,7 @@ export default function Statistics() {
         // Group by district
         const districtGroups: Record<string, number> = {};
         objects.forEach(obj => {
-          const district = obj.district?.replace(' tumani', '') || 'Noma\'lum';
+          const district = obj.district?.replace(' tumani', '') || "Noma'lum";
           districtGroups[district] = (districtGroups[district] || 0) + 1;
         });
 
@@ -200,7 +241,7 @@ export default function Statistics() {
           </div>
 
           {/* Additional Stats */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
@@ -240,10 +281,27 @@ export default function Statistics() {
                 </div>
               </CardContent>
             </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                    <Star className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {stats.avgSolutionRating > 0 ? stats.avgSolutionRating.toFixed(1) : "-"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Yechim baholari ({stats.totalSolutionRatings})
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Charts */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2 mb-6">
             {/* Issue Types Pie */}
             <Card>
               <CardHeader>
@@ -283,51 +341,85 @@ export default function Statistics() {
               </CardContent>
             </Card>
 
-            {/* Districts Bar */}
+            {/* Status Distribution Pie */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  Tumanlar bo'yicha ob'ektlar
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Murojaatlar holati
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {districtData.length === 0 ? (
+                {statusData.length === 0 ? (
                   <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                     Ma'lumot yo'q
                   </div>
                 ) : (
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={districtData} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                        <XAxis type="number" tick={{ fontSize: 12 }} />
-                        <YAxis 
-                          dataKey="name" 
-                          type="category" 
-                          tick={{ fontSize: 11 }} 
-                          width={90}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--card))',
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }}
-                        />
-                        <Bar 
-                          dataKey="value" 
-                          fill="hsl(var(--primary))" 
-                          radius={[0, 4, 4, 0]}
-                          name="Ob'ektlar soni"
-                        />
-                      </BarChart>
+                      <PieChart>
+                        <Pie
+                          data={statusData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, value }) => `${name}: ${value}`}
+                        >
+                          {statusData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
                     </ResponsiveContainer>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
+
+          {/* Districts Bar */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Building2 className="h-5 w-5 text-primary" />
+                Tumanlar bo'yicha ob'ektlar
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {districtData.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Ma'lumot yo'q
+                </div>
+              ) : (
+                <div className="h-[350px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={districtData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="value" 
+                        fill="hsl(var(--primary))" 
+                        radius={[4, 4, 0, 0]}
+                        name="Ob'ektlar soni"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* No data message */}
           {stats.totalFeedbacks === 0 && (
