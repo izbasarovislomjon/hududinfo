@@ -47,11 +47,14 @@ export function Header() {
       <div className="container-gov flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img 
-            src={logo} 
-            alt="HududInfo.uz" 
-            className="h-10 w-auto"
-          />
+          <a href={logo} target="_blank" rel="noopener noreferrer" draggable="false">
+            <img 
+              src={logo} 
+              alt="HududInfo.uz" 
+              className="h-14 w-auto cursor-pointer"
+              draggable="true"
+            />
+          </a>
         </Link>
 
         {/* Desktop Navigation */}
@@ -139,7 +142,8 @@ export function Header() {
                   <img 
                     src={logo} 
                     alt="HududInfo.uz" 
-                    className="h-10 w-auto"
+                    className="h-14 w-auto"
+                    draggable="true"
                   />
                 </div>
                 
