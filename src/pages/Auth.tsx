@@ -163,16 +163,16 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <MapPin className="h-6 w-6 text-primary-foreground" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-background to-green-50 dark:from-blue-950/20 dark:via-background dark:to-green-950/20 flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg shadow-xl border-0 bg-card/80 backdrop-blur-sm">
+        <CardHeader className="text-center space-y-4 pb-6">
+          <div className="flex justify-center mb-2">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-green-500 shadow-lg">
+              <MapPin className="h-8 w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">HududInfo.uz</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">HududInfo.uz</CardTitle>
+          <CardDescription className="text-base">
             Fuqarolar platformasiga xush kelibsiz
           </CardDescription>
         </CardHeader>
@@ -217,8 +217,8 @@ export default function Auth() {
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" className="w-full h-12 text-base font-medium" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                   Kirish
                 </Button>
 
@@ -286,8 +286,8 @@ export default function Auth() {
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" className="w-full h-12 text-base font-medium" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                   Ro'yxatdan o'tish
                 </Button>
               </form>
