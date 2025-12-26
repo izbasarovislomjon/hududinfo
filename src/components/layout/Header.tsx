@@ -51,7 +51,7 @@ export function Header() {
             <img 
               src={logo} 
               alt="HududInfo.uz" 
-              className="h-14 w-auto cursor-pointer"
+              className="h-28 w-auto cursor-pointer"
               draggable="true"
             />
           </a>
