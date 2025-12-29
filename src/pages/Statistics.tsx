@@ -29,6 +29,7 @@ import {
   Star,
   TrendingUp
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const COLORS = ['#3b82f6', '#06b6d4', '#f59e0b', '#ef4444', '#a855f7', '#22c55e', '#64748b'];
 
@@ -60,6 +61,7 @@ interface StatusData {
 }
 
 export default function Statistics() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
     totalFeedbacks: 0,
@@ -201,10 +203,10 @@ export default function Statistics() {
       <section className="bg-card border-b py-6 sm:py-8">
         <div className="container-gov">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            Statistika
+            {t('statistics.title')}
           </h1>
           <p className="text-muted-foreground">
-            Murojaatlar va infratuzilma holati bo'yicha real statistik ma'lumotlar
+            {t('statistics.subtitle')}
           </p>
         </div>
       </section>

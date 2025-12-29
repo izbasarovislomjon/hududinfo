@@ -37,6 +37,7 @@ import {
   ExternalLink,
   Trophy
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TASHKENT_DISTRICTS = [
   "Barcha tumanlar",
@@ -54,6 +55,7 @@ const TASHKENT_DISTRICTS = [
 ];
 
 export default function Index() {
+  const { t } = useLanguage();
   const [objects, setObjects] = useState<InfrastructureObject[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -190,14 +192,13 @@ export default function Index() {
         <div className="container-gov">
           <div className="max-w-3xl">
             <Badge className="bg-primary-foreground/20 text-primary-foreground mb-4">
-              Davlat xizmatlari platformasi
+              {t('hero.badge')}
             </Badge>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-              Hududingiz infratuzilmasini birga yaxshilaymiz
+              {t('hero.title')}
             </h1>
             <p className="text-lg sm:text-xl text-primary-foreground/80 mb-6">
-              Maktab, bog'cha, poliklinika, suv va yo'llardagi muammolarni bildiring. 
-              Sizning ovozingiz muhim!
+              {t('hero.subtitle')}
             </p>
             <div className="flex flex-wrap gap-3">
               <Button 
@@ -207,7 +208,7 @@ export default function Index() {
                 onClick={() => setFeedbackModalOpen(true)}
               >
                 <MessageSquarePlus className="h-5 w-5" />
-                Murojaat yuborish
+                {t('hero.submit_feedback')}
               </Button>
               <Link to="/feedbacks">
                 <Button 
@@ -215,7 +216,7 @@ export default function Index() {
                   variant="ghost"
                   className="gap-2 bg-primary-foreground/15 border border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
                 >
-                  Murojaatlarni ko'rish
+                  {t('hero.view_feedbacks')}
                 </Button>
               </Link>
               <Link to="/priority">
@@ -225,7 +226,7 @@ export default function Index() {
                   className="gap-2 bg-primary-foreground/15 border border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20"
                 >
                   <Trophy className="h-5 w-5" />
-                  Ustuvorlik reytingi
+                  {t('hero.priority_ranking')}
                 </Button>
               </Link>
             </div>
@@ -243,7 +244,7 @@ export default function Index() {
               </div>
               <div>
                 <p className="font-bold text-lg">{stats.totalFeedbacks}</p>
-                <p className="text-xs text-muted-foreground">Jami murojaatlar</p>
+                <p className="text-xs text-muted-foreground">{t('stats.total_feedbacks')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -252,7 +253,7 @@ export default function Index() {
               </div>
               <div>
                 <p className="font-bold text-lg">{stats.resolvedFeedbacks}</p>
-                <p className="text-xs text-muted-foreground">Hal qilingan</p>
+                <p className="text-xs text-muted-foreground">{t('stats.resolved')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -261,7 +262,7 @@ export default function Index() {
               </div>
               <div>
                 <p className="font-bold text-lg">{stats.satisfactionRate}%</p>
-                <p className="text-xs text-muted-foreground">Qoniqish darajasi</p>
+                <p className="text-xs text-muted-foreground">{t('stats.satisfaction')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -270,7 +271,7 @@ export default function Index() {
               </div>
               <div>
                 <p className="font-bold text-lg">{objects.length}</p>
-                <p className="text-xs text-muted-foreground">Obyektlar</p>
+                <p className="text-xs text-muted-foreground">{t('stats.objects')}</p>
               </div>
             </div>
           </div>

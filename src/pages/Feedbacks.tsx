@@ -20,7 +20,8 @@ import {
 } from "@/lib/types";
 import { Search, Filter, SlidersHorizontal, ThumbsUp, Clock, MessageSquare, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { uz } from "date-fns/locale";
+import { uz, ru } from "date-fns/locale";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FeedbackItem {
   id: string;
@@ -35,11 +36,16 @@ interface FeedbackItem {
 }
 
 export default function Feedbacks() {
+  const { t, language } = useLanguage();
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">("all");
   const [typeFilter, setTypeFilter] = useState<IssueType | "all">("all");
+
+  const getDateLocale = () => {
+    return language === "ru" ? ru : uz;
+  };
 
   useEffect(() => {
     fetchFeedbacks();
@@ -114,10 +120,10 @@ export default function Feedbacks() {
       <section className="bg-card border-b py-6 sm:py-8">
         <div className="container-gov">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            Fuqarolar murojaatlari
+            {t('feedbacks.title')}
           </h1>
           <p className="text-muted-foreground">
-            Foydalanuvchilar tomonidan yuborilgan murojaatlar
+            {t('feedbacks.subtitle')}
           </p>
         </div>
       </section>
@@ -130,7 +136,7 @@ export default function Feedbacks() {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Qidirish..."
+                placeholder={t('filter.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -172,12 +178,12 @@ export default function Feedbacks() {
 
           {/* Quick Status Tabs */}
           <div className="flex flex-wrap gap-2 mt-4">
-            {[
-              { key: "all" as const, label: "Barchasi" },
-              { key: "submitted" as const, label: statusLabels.submitted },
-              { key: "reviewing" as const, label: statusLabels.reviewing },
-              { key: "in_progress" as const, label: statusLabels.in_progress },
-              { key: "completed" as const, label: statusLabels.completed },
+          {[
+              { key: "all" as const, label: t('feedbacks.all') },
+              { key: "submitted" as const, label: t('status.submitted') },
+              { key: "reviewing" as const, label: t('status.reviewing') },
+              { key: "in_progress" as const, label: t('status.in_progress') },
+              { key: "completed" as const, label: t('status.completed') },
             ].map(({ key, label }) => (
               <Badge
                 key={key}
@@ -203,15 +209,15 @@ export default function Feedbacks() {
             <Card>
               <CardContent className="py-12 text-center">
                 <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">Hali murojaatlar yo'q</h3>
+                <h3 className="font-semibold mb-2">{t('feedbacks.no_feedbacks')}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Fuqarolar murojaat yuborgandan so'ng bu yerda ko'rinadi
+                  {t('feedbacks.no_feedbacks_desc')}
                 </p>
               </CardContent>
             </Card>
           ) : filteredFeedbacks.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Filtr bo'yicha murojaatlar topilmadi</p>
+              <p className="text-muted-foreground">{t('feedbacks.filter_none')}</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -221,10 +227,10 @@ export default function Feedbacks() {
                     {/* Header */}
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <Badge variant="outline" className="text-xs">
-                        {issueTypeLabels[feedback.issue_type]}
+                        {t(`issue.${feedback.issue_type}`)}
                       </Badge>
                       <Badge className={`text-xs ${getStatusColor(feedback.status)}`}>
-                        {statusLabels[feedback.status]}
+                        {t(`status.${feedback.status}`)}
                       </Badge>
                     </div>
 
@@ -249,7 +255,7 @@ export default function Feedbacks() {
                           <Clock className="h-3 w-3" />
                           {formatDistanceToNow(new Date(feedback.created_at), { 
                             addSuffix: true,
-                            locale: uz 
+                            locale: getDateLocale()
                           })}
                         </span>
                       </div>
