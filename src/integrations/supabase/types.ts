@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_projects: {
+        Row: {
+          allocated_amount: number
+          created_at: string
+          description: string | null
+          district: string | null
+          donor: string | null
+          end_year: number | null
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          region: string
+          sector: string
+          source_type: string
+          spent_amount: number
+          start_year: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number
+          created_at?: string
+          description?: string | null
+          district?: string | null
+          donor?: string | null
+          end_year?: number | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          region: string
+          sector: string
+          source_type: string
+          spent_amount?: number
+          start_year?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number
+          created_at?: string
+          description?: string | null
+          district?: string | null
+          donor?: string | null
+          end_year?: number | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          region?: string
+          sector?: string
+          source_type?: string
+          spent_amount?: number
+          start_year?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feedback_images: {
         Row: {
           created_at: string | null
@@ -134,6 +194,33 @@ export type Database = {
           },
         ]
       }
+      game_scores: {
+        Row: {
+          game_type: string
+          id: string
+          level: number
+          played_at: string
+          score: number
+          user_id: string | null
+        }
+        Insert: {
+          game_type: string
+          id?: string
+          level?: number
+          played_at?: string
+          score?: number
+          user_id?: string | null
+        }
+        Update: {
+          game_type?: string
+          id?: string
+          level?: number
+          played_at?: string
+          score?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       infrastructure_objects: {
         Row: {
           address: string
@@ -191,6 +278,54 @@ export type Database = {
           total_feedbacks?: number | null
           total_reviews?: number | null
           type?: Database["public"]["Enums"]["object_type"]
+        }
+        Relationships: []
+      }
+      news: {
+        Row: {
+          author_id: string | null
+          category: string
+          content: string
+          created_at: string
+          district: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean
+          published_at: string
+          region: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          category?: string
+          content: string
+          created_at?: string
+          district?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          published_at?: string
+          region?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          category?: string
+          content?: string
+          created_at?: string
+          district?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          published_at?: string
+          region?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

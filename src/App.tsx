@@ -17,6 +17,9 @@ import AdminLogin from "./pages/AdminLogin";
 import MyFeedbacks from "./pages/MyFeedbacks";
 import ObjectDetail from "./pages/ObjectDetail";
 import NotFound from "./pages/NotFound";
+import News from "./pages/News";
+import Games from "./pages/Games";
+import Budget from "./pages/Budget";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -66,6 +69,9 @@ const App = () => {
               <Route path="/statistics" element={<Statistics />} />
               <Route path="/priority" element={<PriorityRanking />} />
               <Route path="/object/:id" element={<ObjectDetail />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/games" element={<Games />} />
+              <Route path="/budget" element={<Budget />} />
               
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />
