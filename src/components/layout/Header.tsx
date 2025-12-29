@@ -11,13 +11,14 @@ import {
   User,
   FileText,
   Shield,
-  Trophy,
   Newspaper,
   Brain,
   Wallet
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,20 +28,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.jpg";
 
-const navItems = [
-  { href: "/", label: "Asosiy", icon: Home },
-  { href: "/feedbacks", label: "Murojaatlar", icon: MessageSquarePlus },
-  { href: "/news", label: "Yangiliklar", icon: Newspaper },
-  { href: "/budget", label: "Byudjet", icon: Wallet },
-  { href: "/games", label: "O'yinlar", icon: Brain },
-  { href: "/statistics", label: "Statistika", icon: BarChart3 },
-];
-
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+
+  const navItems = [
+    { href: "/", label: t("nav.home"), icon: Home },
+    { href: "/feedbacks", label: t("nav.feedbacks"), icon: MessageSquarePlus },
+    { href: "/news", label: t("nav.news"), icon: Newspaper },
+    { href: "/budget", label: t("nav.budget"), icon: Wallet },
+    { href: "/games", label: t("nav.games"), icon: Brain },
+    { href: "/statistics", label: t("nav.statistics"), icon: BarChart3 },
+  ];
 
   const handleSignOut = async () => {
     await signOut();
@@ -84,22 +86,24 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
                   <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">Profil</span>
+                  <span className="hidden sm:inline">{t("nav.profile")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="h-4 w-4 mr-2" />
-                  Profilim
+                  {t("nav.profile")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/my-feedbacks')}>
                   <FileText className="h-4 w-4 mr-2" />
-                  Mening murojaatlarim
+                  {t("nav.my_feedbacks")}
                 </DropdownMenuItem>
                 {isAdmin && (
                   <>
@@ -113,7 +117,7 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Chiqish
+                  {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -128,7 +132,7 @@ export function Header() {
               <Link to="/auth">
                 <Button size="sm" className="gap-2">
                   <LogIn className="h-4 w-4" />
-                  <span className="hidden sm:inline">Kirish</span>
+                  <span className="hidden sm:inline">{t("nav.login")}</span>
                 </Button>
               </Link>
             </>
@@ -180,7 +184,7 @@ export function Header() {
                       <Link to="/my-feedbacks" onClick={() => setIsOpen(false)}>
                         <Button variant="outline" className="w-full justify-start gap-3 mb-2">
                           <FileText className="h-5 w-5" />
-                          Mening murojaatlarim
+                          {t("nav.my_feedbacks")}
                         </Button>
                       </Link>
                       {isAdmin && (
@@ -200,7 +204,7 @@ export function Header() {
                         }}
                       >
                         <LogOut className="h-5 w-5" />
-                        Chiqish
+                        {t("nav.logout")}
                       </Button>
                     </>
                   ) : (
@@ -214,7 +218,7 @@ export function Header() {
                       <Link to="/auth" onClick={() => setIsOpen(false)}>
                         <Button className="w-full justify-start gap-3">
                           <LogIn className="h-5 w-5" />
-                          Kirish
+                          {t("nav.login")}
                         </Button>
                       </Link>
                     </>
