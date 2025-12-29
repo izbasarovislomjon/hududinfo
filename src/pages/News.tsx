@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { uz } from "date-fns/locale";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const regions = [
   "Barcha viloyatlar",
@@ -38,6 +40,7 @@ const categories = [
 ];
 
 export default function News() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("Barcha viloyatlar");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -157,48 +160,50 @@ export default function News() {
         ) : filteredNews && filteredNews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredNews.map((item) => (
-              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer">
-                {item.image_url ? (
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-48 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                    <Newspaper className="h-16 w-16 text-primary/40" />
-                  </div>
-                )}
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className={getCategoryColor(item.category)}>
-                      {getCategoryLabel(item.category)}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                    {item.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
-                    {item.summary || item.content.substring(0, 150)}...
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    {item.region && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {item.region}
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {format(new Date(item.published_at), "d MMMM yyyy", { locale: uz })}
+              <Link key={item.id} to={`/news/${item.id}`}>
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer h-full">
+                  {item.image_url ? (
+                    <div className="h-48 overflow-hidden">
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  ) : (
+                    <div className="h-48 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <Newspaper className="h-16 w-16 text-primary/40" />
+                    </div>
+                  )}
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className={getCategoryColor(item.category)}>
+                        {getCategoryLabel(item.category)}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                      {item.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
+                      {item.summary || item.content.substring(0, 150)}...
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      {item.region && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {item.region}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(new Date(item.published_at), "d MMMM yyyy", { locale: uz })}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (
