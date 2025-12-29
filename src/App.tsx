@@ -53,46 +53,46 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            {showSplash && !hasVisited && (
-              <SplashScreen onComplete={handleSplashComplete} />
-            )}
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/feedbacks" element={<Feedbacks />} />
-              <Route path="/my-feedbacks" element={<MyFeedbacks />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/statistics" element={<Statistics />} />
-              <Route path="/priority" element={<PriorityRanking />} />
-              <Route path="/object/:id" element={<ObjectDetail />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/games" element={<Games />} />
-              <Route path="/budget" element={<Budget />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/feedbacks" element={<AdminFeedbacks />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/objects" element={<AdminObjects />} />
-              <Route path="/admin/news" element={<AdminNews />} />
-              <Route path="/admin/budget" element={<AdminBudget />} />
-              <Route path="/admin/statistics" element={<AdminStatistics />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+      <BrowserRouter>
+        <LanguageProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              {showSplash && !hasVisited && (
+                <SplashScreen onComplete={handleSplashComplete} />
+              )}
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/feedbacks" element={<Feedbacks />} />
+                <Route path="/my-feedbacks" element={<MyFeedbacks />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/statistics" element={<Statistics />} />
+                <Route path="/priority" element={<PriorityRanking />} />
+                <Route path="/object/:id" element={<ObjectDetail />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/games" element={<Games />} />
+                <Route path="/budget" element={<Budget />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/feedbacks" element={<AdminFeedbacks />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/objects" element={<AdminObjects />} />
+                <Route path="/admin/news" element={<AdminNews />} />
+                <Route path="/admin/budget" element={<AdminBudget />} />
+                <Route path="/admin/statistics" element={<AdminStatistics />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 
