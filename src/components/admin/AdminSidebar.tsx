@@ -6,11 +6,12 @@ import {
   Users,
   BarChart3,
   School,
-  Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Shield,
+  Newspaper,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -38,6 +39,16 @@ const menuItems = [
     title: "Obyektlar",
     href: "/admin/objects",
     icon: School,
+  },
+  {
+    title: "Yangiliklar",
+    href: "/admin/news",
+    icon: Newspaper,
+  },
+  {
+    title: "Byudjet",
+    href: "/admin/budget",
+    icon: Wallet,
   },
   {
     title: "Statistika",
