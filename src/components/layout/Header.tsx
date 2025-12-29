@@ -11,7 +11,10 @@ import {
   User,
   FileText,
   Shield,
-  Trophy
+  Trophy,
+  Newspaper,
+  Brain,
+  Wallet
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,7 +30,9 @@ import logo from "@/assets/logo.jpg";
 const navItems = [
   { href: "/", label: "Asosiy", icon: Home },
   { href: "/feedbacks", label: "Murojaatlar", icon: MessageSquarePlus },
-  { href: "/priority", label: "Ustuvorlik", icon: Trophy },
+  { href: "/news", label: "Yangiliklar", icon: Newspaper },
+  { href: "/budget", label: "Byudjet", icon: Wallet },
+  { href: "/games", label: "O'yinlar", icon: Brain },
   { href: "/statistics", label: "Statistika", icon: BarChart3 },
 ];
 
