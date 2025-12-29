@@ -115,6 +115,9 @@ const translations: Record<Language, Record<string, string>> = {
     "news.all_regions": "Barcha hududlar",
     "news.no_news": "Yangiliklar topilmadi",
     "news.read_more": "Davomini o'qish",
+    "news.not_found": "Yangilik topilmadi",
+    "news.not_found_desc": "Siz izlayotgan yangilik mavjud emas yoki o'chirilgan",
+    "news.back_to_list": "Yangiliklarga qaytish",
     
     // Budget
     "budget.title": "Byudjet shaffofligi",
@@ -137,6 +140,15 @@ const translations: Record<Language, Record<string, string>> = {
     "games.memory": "Xotira o'yini",
     "games.quiz": "Bilimlar bellashuvi",
     "games.leaderboard": "Eng yaxshilar",
+    "games.start": "O'yinni boshlash",
+    "games.restart": "Qayta boshlash",
+    "games.moves": "Harakatlar",
+    "games.score": "Ball",
+    "games.congratulations": "Tabriklaymiz!",
+    "games.you_won": "Siz yutdingiz!",
+    "games.test_completed": "Test yakunlandi!",
+    "games.question": "Savol",
+    "games.no_scores": "Hali hech kim o'ynamagan",
     
     // Profile
     "profile.title": "Profil",
@@ -154,6 +166,44 @@ const translations: Record<Language, Record<string, string>> = {
     "auth.forgot_password": "Parolni unutdingizmi?",
     "auth.no_account": "Hisobingiz yo'qmi?",
     "auth.have_account": "Hisobingiz bormi?",
+    
+    // Object Details
+    "object.details": "Batafsil ma'lumot",
+    "object.address": "Manzil",
+    "object.district": "Tuman",
+    "object.region": "Viloyat",
+    "object.capacity": "Sig'imi",
+    "object.built_year": "Qurilgan yil",
+    "object.last_renovation": "Oxirgi ta'mirlash",
+    "object.feedbacks": "Murojaatlar",
+    "object.reviews": "Sharhlar",
+    "object.add_review": "Sharh qoldirish",
+    "object.new": "Yangi",
+    "object.reconstructed": "Ta'mirlangan",
+    
+    // Statistics page
+    "statistics.title": "Statistika",
+    "statistics.subtitle": "Murojaatlar va infratuzilma holati bo'yicha real statistik ma'lumotlar",
+    "statistics.issue_types": "Muammo turlari bo'yicha murojaatlar",
+    "statistics.status_distribution": "Murojaatlar holati",
+    "statistics.by_district": "Tumanlar bo'yicha ob'ektlar",
+    "statistics.total_reviews": "Jami sharhlar",
+    "statistics.resolution_rate": "Hal qilish darajasi",
+    "statistics.solution_ratings": "Yechim baholari",
+    
+    // Priority page
+    "priority.title": "Ustuvorlik reytingi",
+    "priority.subtitle": "Eng ko'p ovoz to'plagan murojaatlar",
+    "priority.vote": "Ovoz berish",
+    "priority.votes": "ovoz",
+    
+    // Feedbacks page
+    "feedbacks.title": "Fuqarolar murojaatlari",
+    "feedbacks.subtitle": "Foydalanuvchilar tomonidan yuborilgan murojaatlar",
+    "feedbacks.no_feedbacks": "Hali murojaatlar yo'q",
+    "feedbacks.no_feedbacks_desc": "Fuqarolar murojaat yuborgandan so'ng bu yerda ko'rinadi",
+    "feedbacks.filter_none": "Filtr bo'yicha murojaatlar topilmadi",
+    "feedbacks.all": "Barchasi",
   },
   
   ru: {
@@ -251,6 +301,9 @@ const translations: Record<Language, Record<string, string>> = {
     "news.all_regions": "Все регионы",
     "news.no_news": "Новостей не найдено",
     "news.read_more": "Читать далее",
+    "news.not_found": "Новость не найдена",
+    "news.not_found_desc": "Искомая новость не существует или была удалена",
+    "news.back_to_list": "Вернуться к новостям",
     
     // Budget
     "budget.title": "Прозрачность бюджета",
@@ -273,6 +326,15 @@ const translations: Record<Language, Record<string, string>> = {
     "games.memory": "Игра на память",
     "games.quiz": "Викторина",
     "games.leaderboard": "Лидеры",
+    "games.start": "Начать игру",
+    "games.restart": "Начать заново",
+    "games.moves": "Ходы",
+    "games.score": "Очки",
+    "games.congratulations": "Поздравляем!",
+    "games.you_won": "Вы выиграли!",
+    "games.test_completed": "Тест завершён!",
+    "games.question": "Вопрос",
+    "games.no_scores": "Пока никто не играл",
     
     // Profile
     "profile.title": "Профиль",
@@ -290,6 +352,44 @@ const translations: Record<Language, Record<string, string>> = {
     "auth.forgot_password": "Забыли пароль?",
     "auth.no_account": "Нет аккаунта?",
     "auth.have_account": "Уже есть аккаунт?",
+    
+    // Object Details
+    "object.details": "Подробная информация",
+    "object.address": "Адрес",
+    "object.district": "Район",
+    "object.region": "Область",
+    "object.capacity": "Вместимость",
+    "object.built_year": "Год постройки",
+    "object.last_renovation": "Последний ремонт",
+    "object.feedbacks": "Обращения",
+    "object.reviews": "Отзывы",
+    "object.add_review": "Оставить отзыв",
+    "object.new": "Новый",
+    "object.reconstructed": "Отремонтирован",
+    
+    // Statistics page
+    "statistics.title": "Статистика",
+    "statistics.subtitle": "Реальные статистические данные по обращениям и инфраструктуре",
+    "statistics.issue_types": "Обращения по типам проблем",
+    "statistics.status_distribution": "Статус обращений",
+    "statistics.by_district": "Объекты по районам",
+    "statistics.total_reviews": "Всего отзывов",
+    "statistics.resolution_rate": "Процент решения",
+    "statistics.solution_ratings": "Оценки решений",
+    
+    // Priority page
+    "priority.title": "Рейтинг приоритетов",
+    "priority.subtitle": "Обращения с наибольшим количеством голосов",
+    "priority.vote": "Голосовать",
+    "priority.votes": "голосов",
+    
+    // Feedbacks page
+    "feedbacks.title": "Обращения граждан",
+    "feedbacks.subtitle": "Обращения, отправленные пользователями",
+    "feedbacks.no_feedbacks": "Обращений пока нет",
+    "feedbacks.no_feedbacks_desc": "Обращения появятся здесь после их отправки гражданами",
+    "feedbacks.filter_none": "Обращений по фильтру не найдено",
+    "feedbacks.all": "Все",
   },
   
   cy: {
@@ -387,6 +487,9 @@ const translations: Record<Language, Record<string, string>> = {
     "news.all_regions": "Барча ҳудудлар",
     "news.no_news": "Янгиликлар топилмади",
     "news.read_more": "Давомини ўқиш",
+    "news.not_found": "Янгилик топилмади",
+    "news.not_found_desc": "Сиз излаётган янгилик мавжуд эмас ёки ўчирилган",
+    "news.back_to_list": "Янгиликларга қайтиш",
     
     // Budget
     "budget.title": "Бюджет шаффофлиги",
@@ -401,7 +504,7 @@ const translations: Record<Language, Record<string, string>> = {
     "budget.source.foreign_grant": "Хорижий грант",
     "budget.source.foreign_credit": "Хорижий кредит",
     "budget.source.foreign_investment": "Хорижий инвестиция",
-    "budget.source.ppp": "Давлат-хусусий шерикли",
+    "budget.source.ppp": "Давлат-хусусий шериклик",
     
     // Games
     "games.title": "Ақлий ўйинлар",
@@ -409,6 +512,15 @@ const translations: Record<Language, Record<string, string>> = {
     "games.memory": "Хотира ўйини",
     "games.quiz": "Билимлар беллашуви",
     "games.leaderboard": "Энг яхшилар",
+    "games.start": "Ўйинни бошлаш",
+    "games.restart": "Қайта бошлаш",
+    "games.moves": "Ҳаракатлар",
+    "games.score": "Балл",
+    "games.congratulations": "Табриклаймиз!",
+    "games.you_won": "Сиз ютдингиз!",
+    "games.test_completed": "Тест якунланди!",
+    "games.question": "Савол",
+    "games.no_scores": "Ҳали ҳеч ким ўйнамаган",
     
     // Profile
     "profile.title": "Профил",
@@ -426,6 +538,44 @@ const translations: Record<Language, Record<string, string>> = {
     "auth.forgot_password": "Паролни унутдингизми?",
     "auth.no_account": "Ҳисобингиз йўқми?",
     "auth.have_account": "Ҳисобингиз борми?",
+    
+    // Object Details
+    "object.details": "Батафсил маълумот",
+    "object.address": "Манзил",
+    "object.district": "Туман",
+    "object.region": "Вилоят",
+    "object.capacity": "Сиғими",
+    "object.built_year": "Қурилган йил",
+    "object.last_renovation": "Охирги таъмирлаш",
+    "object.feedbacks": "Мурожаатлар",
+    "object.reviews": "Шарҳлар",
+    "object.add_review": "Шарҳ қолдириш",
+    "object.new": "Янги",
+    "object.reconstructed": "Таъмирланган",
+    
+    // Statistics page
+    "statistics.title": "Статистика",
+    "statistics.subtitle": "Мурожаатлар ва инфратузилма ҳолати бўйича реал статистик маълумотлар",
+    "statistics.issue_types": "Муаммо турлари бўйича мурожаатлар",
+    "statistics.status_distribution": "Мурожаатлар ҳолати",
+    "statistics.by_district": "Туманлар бўйича объектлар",
+    "statistics.total_reviews": "Жами шарҳлар",
+    "statistics.resolution_rate": "Ҳал қилиш даражаси",
+    "statistics.solution_ratings": "Ечим баҳолари",
+    
+    // Priority page
+    "priority.title": "Устуворлик рейтинги",
+    "priority.subtitle": "Энг кўп овоз тўплаган мурожаатлар",
+    "priority.vote": "Овоз бериш",
+    "priority.votes": "овоз",
+    
+    // Feedbacks page
+    "feedbacks.title": "Фуқаролар мурожаатлари",
+    "feedbacks.subtitle": "Фойдаланувчилар томонидан юборилган мурожаатлар",
+    "feedbacks.no_feedbacks": "Ҳали мурожаатлар йўқ",
+    "feedbacks.no_feedbacks_desc": "Фуқаролар мурожаат юборгандан сўнг бу ерда кўринади",
+    "feedbacks.filter_none": "Филтр бўйича мурожаатлар топилмади",
+    "feedbacks.all": "Барчаси",
   },
 };
 
