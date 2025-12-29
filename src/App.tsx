@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { SplashScreen } from "@/components/SplashScreen";
 import Index from "./pages/Index";
 import Feedbacks from "./pages/Feedbacks";
@@ -52,13 +53,14 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          {showSplash && !hasVisited && (
-            <SplashScreen onComplete={handleSplashComplete} />
-          )}
+      <LanguageProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            {showSplash && !hasVisited && (
+              <SplashScreen onComplete={handleSplashComplete} />
+            )}
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -89,7 +91,8 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
-    </QueryClientProvider>
+    </LanguageProvider>
+  </QueryClientProvider>
   );
 };
 
