@@ -27,6 +27,8 @@ import AdminFeedbacks from "./pages/admin/AdminFeedbacks";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminObjects from "./pages/admin/AdminObjects";
 import AdminStatistics from "./pages/admin/AdminStatistics";
+import AdminNews from "./pages/admin/AdminNews";
+import AdminBudget from "./pages/admin/AdminBudget";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +80,8 @@ const App = () => {
               <Route path="/admin/feedbacks" element={<AdminFeedbacks />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/objects" element={<AdminObjects />} />
+              <Route path="/admin/news" element={<AdminNews />} />
+              <Route path="/admin/budget" element={<AdminBudget />} />
               <Route path="/admin/statistics" element={<AdminStatistics />} />
               
               <Route path="*" element={<NotFound />} />
