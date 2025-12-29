@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,12 @@ import {
   Trash2, 
   Newspaper,
   Search,
-  Loader2 
+  Loader2,
+  Upload,
+  Image,
+  Video,
+  Link as LinkIcon,
+  X
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -49,6 +54,7 @@ interface News {
   region: string | null;
   district: string | null;
   image_url: string | null;
+  video_url?: string | null;
   is_published: boolean;
   published_at: string;
   created_at: string;
@@ -87,6 +93,12 @@ export default function AdminNews() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<News | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+
+  // Refs for file inputs
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -95,6 +107,7 @@ export default function AdminNews() {
   const [category, setCategory] = useState("general");
   const [region, setRegion] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [isPublished, setIsPublished] = useState(true);
 
   useEffect(() => {
@@ -125,6 +138,7 @@ export default function AdminNews() {
     setCategory("general");
     setRegion("");
     setImageUrl("");
+    setVideoUrl("");
     setIsPublished(true);
     setEditingNews(null);
   };
@@ -137,8 +151,101 @@ export default function AdminNews() {
     setCategory(item.category);
     setRegion(item.region || "");
     setImageUrl(item.image_url || "");
+    setVideoUrl((item as any).video_url || "");
     setIsPublished(item.is_published);
     setModalOpen(true);
+  };
+
+  // Upload image file
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Faqat rasm fayllarini yuklash mumkin");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Rasm hajmi 5MB dan oshmasligi kerak");
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `news-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('news-media')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('news-media')
+        .getPublicUrl(filePath);
+
+      setImageUrl(publicUrl);
+      toast.success("Rasm yuklandi");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error("Rasm yuklanmadi: " + error.message);
+    } finally {
+      setUploadingImage(false);
+      if (imageInputRef.current) {
+        imageInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Upload video file
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+      toast.error("Faqat video fayllarini yuklash mumkin");
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Video hajmi 50MB dan oshmasligi kerak");
+      return;
+    }
+
+    setUploadingVideo(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `news-videos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('news-media')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('news-media')
+        .getPublicUrl(filePath);
+
+      setVideoUrl(publicUrl);
+      toast.success("Video yuklandi");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error("Video yuklanmadi: " + error.message);
+    } finally {
+      setUploadingVideo(false);
+      if (videoInputRef.current) {
+        videoInputRef.current.value = '';
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -156,6 +263,7 @@ export default function AdminNews() {
         category,
         region: region || null,
         image_url: imageUrl.trim() || null,
+        video_url: videoUrl.trim() || null,
         is_published: isPublished,
         published_at: isPublished ? new Date().toISOString() : null,
       };
@@ -385,13 +493,137 @@ export default function AdminNews() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Rasm URL</Label>
-                <Input
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                />
+              {/* Image Upload Section */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Image className="h-4 w-4" />
+                  Rasm
+                </Label>
+                
+                {/* Image Preview */}
+                {imageUrl && (
+                  <div className="relative w-full h-40 rounded-lg overflow-hidden border">
+                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="absolute top-2 right-2"
+                      onClick={() => setImageUrl("")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  {/* File Upload */}
+                  <input
+                    type="file"
+                    ref={imageInputRef}
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    className="flex-1"
+                  >
+                    {uploadingImage ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    Kompyuterdan yuklash
+                  </Button>
+                </div>
+
+                {/* URL Input (Optional) */}
+                <div className="flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="Yoki URL manzili kiriting (ixtiyoriy)"
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+
+              {/* Video Upload Section */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Video (ixtiyoriy)
+                </Label>
+
+                {/* Video Preview */}
+                {videoUrl && (
+                  <div className="relative w-full rounded-lg overflow-hidden border">
+                    {videoUrl.includes('youtube') || videoUrl.includes('youtu.be') || videoUrl.includes('vimeo') ? (
+                      <div className="p-3 bg-muted/50 flex items-center justify-between">
+                        <span className="text-sm truncate">{videoUrl}</span>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setVideoUrl("")}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <video src={videoUrl} className="w-full h-40 object-cover" />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2"
+                          onClick={() => setVideoUrl("")}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  {/* File Upload */}
+                  <input
+                    type="file"
+                    ref={videoInputRef}
+                    accept="video/*"
+                    onChange={handleVideoUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => videoInputRef.current?.click()}
+                    disabled={uploadingVideo}
+                    className="flex-1"
+                  >
+                    {uploadingVideo ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    Video yuklash
+                  </Button>
+                </div>
+
+                {/* URL Input (Optional) */}
+                <div className="flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="YouTube/Vimeo URL yoki video havolasi"
+                    className="flex-1"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">

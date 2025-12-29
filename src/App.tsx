@@ -19,6 +19,7 @@ import MyFeedbacks from "./pages/MyFeedbacks";
 import ObjectDetail from "./pages/ObjectDetail";
 import NotFound from "./pages/NotFound";
 import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
 import Games from "./pages/Games";
 import Budget from "./pages/Budget";
 
@@ -74,6 +75,7 @@ const App = () => {
                 <Route path="/priority" element={<PriorityRanking />} />
                 <Route path="/object/:id" element={<ObjectDetail />} />
                 <Route path="/news" element={<News />} />
+                <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/games" element={<Games />} />
                 <Route path="/budget" element={<Budget />} />
                 
