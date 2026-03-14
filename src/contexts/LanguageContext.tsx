@@ -37,7 +37,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero
     "hero.badge": "Davlat xizmatlari platformasi",
     "hero.title": "Hududingiz infratuzilmasini birga yaxshilaymiz",
-    "hero.subtitle": "Maktab, bog'cha, poliklinika, suv va yo'llardagi muammolarni bildiring. Sizning ovozingiz muhim!",
+    "hero.subtitle": "Maktab, bog'cha, poliklinika, suv va yo'llardagi muammolarni bildirng. O'zgarishlar sizning murojaatingizdan boshlanadi!",
     "hero.submit_feedback": "Murojaat yuborish",
     "hero.view_feedbacks": "Murojaatlarni ko'rish",
     "hero.priority_ranking": "Ustuvorlik reytingi",
