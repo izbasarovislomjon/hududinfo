@@ -1,300 +1,54 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { MapPin, Loader2, Mail, Lock, User } from 'lucide-react';
-import { z } from 'zod';
-
-const normalizeEmail = (value: string) => value.trim().toLowerCase();
-const normalizePassword = (value: string) => value.replace(/^password:\s*/i, '').trim();
-
-const emailSchema = z.string().email("Noto'g'ri email format");
-const passwordSchema = z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak");
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { Rocket, Shield, User } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, signUp, signIn } = useAuth();
-  const { toast } = useToast();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
+  const { activateAdminDemo, activateGuestDemo } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
-
-  const validateForm = (isSignUp: boolean) => {
-    const newErrors: { email?: string; password?: string; fullName?: string } = {};
-
-    const emailToValidate = normalizeEmail(email);
-    const passwordToValidate = normalizePassword(password);
-
-    try {
-      emailSchema.parse(emailToValidate);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.email = e.errors[0].message;
-      }
-    }
-
-    try {
-      passwordSchema.parse(passwordToValidate);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.password = e.errors[0].message;
-      }
-    }
-
-    if (isSignUp && !fullName.trim()) {
-      newErrors.fullName = 'Ism kiritilishi shart';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm(false)) return;
-
-    const normalizedEmail = normalizeEmail(email);
-    const normalizedPassword = normalizePassword(password);
-
-    if (normalizedEmail !== email) setEmail(normalizedEmail);
-    if (normalizedPassword !== password) setPassword(normalizedPassword);
-
-    setIsLoading(true);
-    const { error } = await signIn(normalizedEmail, normalizedPassword);
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: 'Xatolik',
-        description:
-          error.message === 'Invalid login credentials' ? "Email yoki parol noto'g'ri" : error.message,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Muvaffaqiyatli',
-        description: 'Tizimga kirdingiz',
-      });
-      navigate('/');
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    const normalizedEmail = normalizeEmail(email);
-
-    const parsed = emailSchema.safeParse(normalizedEmail);
-    if (!parsed.success) {
-      setErrors((prev) => ({ ...prev, email: parsed.error.errors[0]?.message ?? "Noto'g'ri email" }));
-      toast({
-        title: 'Email xato',
-        description: "Parolni tiklash uchun to'g'ri email kiriting",
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: 'Xatolik',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    toast({
-      title: 'Yuborildi',
-      description: 'Emailga parolni tiklash havolasi yuborildi',
-    });
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm(true)) return;
-
-    const normalizedEmail = normalizeEmail(email);
-    const normalizedPassword = normalizePassword(password);
-
-    if (normalizedEmail !== email) setEmail(normalizedEmail);
-    if (normalizedPassword !== password) setPassword(normalizedPassword);
-
-    setIsLoading(true);
-    const { error } = await signUp(normalizedEmail, normalizedPassword, fullName.trim());
-    setIsLoading(false);
-
-    if (error) {
-      let errorMessage = error.message;
-      if (error.message.includes('already registered')) {
-        errorMessage = "Bu email allaqachon ro'yxatdan o'tgan";
-      }
-      toast({
-        title: 'Xatolik',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Muvaffaqiyatli',
-        description: "Ro'yxatdan o'tdingiz!",
-      });
-      navigate('/');
-    }
-  };
+    document.title = "Demo kirish | HududInfo";
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-background to-green-50 dark:from-blue-950/20 dark:via-background dark:to-green-950/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg shadow-xl border-0 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="text-center space-y-4 pb-6">
-          <div className="flex justify-center mb-2">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-green-500 shadow-lg">
-              <MapPin className="h-8 w-8 text-white" />
-            </div>
+    <main className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-xl border-primary/15 shadow-lg">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+            <Rocket className="h-7 w-7 text-primary" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">HududInfo.uz</CardTitle>
-          <CardDescription className="text-base">
-            Fuqarolar platformasiga xush kelibsiz
+          <CardTitle className="text-2xl">Hackathon demo rejimi</CardTitle>
+          <CardDescription>
+            Login shart emas. Juri tez sinab ko'rishi uchun demo profillar avtomatik yaratiladi.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Kirish</TabsTrigger>
-              <TabsTrigger value="signup">Ro'yxatdan o'tish</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Parol</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
-                
-                <Button type="submit" className="w-full h-12 text-base font-medium" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                  Kirish
-                </Button>
-
-                <div className="text-center">
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="px-0 text-sm"
-                    onClick={handleForgotPassword}
-                    disabled={isLoading}
-                  >
-                    Parolni unutdingizmi?
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">To'liq ism</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="Ismingiz"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Parol</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="Kamida 6 ta belgi"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
-                
-                <Button type="submit" className="w-full h-12 text-base font-medium" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                  Ro'yxatdan o'tish
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+        <CardContent className="space-y-3">
+          <Button
+            className="w-full gap-2"
+            onClick={async () => {
+              await activateGuestDemo({ forceNew: true });
+              navigate("/");
+            }}
+          >
+            <User className="h-4 w-4" />
+            Fuqaro demo boshlash
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={async () => {
+              await activateAdminDemo();
+              navigate("/admin");
+            }}
+          >
+            <Shield className="h-4 w-4" />
+            Admin demo ochish
+          </Button>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

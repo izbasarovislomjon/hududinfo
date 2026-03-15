@@ -1,442 +1,532 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/layout/Header";
-import { StatCard } from "@/components/stats/StatCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { issueTypeLabels, IssueType } from "@/lib/types";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line
 } from "recharts";
-import { 
-  MessageSquare, 
-  CheckCircle2, 
-  Clock, 
-  ThumbsUp,
+import {
   AlertCircle,
-  Loader2,
+  AlertTriangle,
   Building2,
-  Star,
-  TrendingUp
+  Loader2,
+  MapPin,
+  ShieldCheck,
+  TrendingUp,
 } from "lucide-react";
+import { PriorityMap } from "@/components/map/PriorityMap";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  fetchGeoasrOverview,
+  type GeoasrOverview,
+  GEOASR_DATASET_LABELS,
+} from "@/lib/geoasr-api";
 
-const COLORS = ['#3b82f6', '#06b6d4', '#f59e0b', '#ef4444', '#a855f7', '#22c55e', '#64748b'];
+const CHART_COLORS = [
+  "hsl(221 83% 47%)",
+  "hsl(175 65% 36%)",
+  "hsl(3 78% 54%)",
+  "hsl(36 90% 48%)",
+  "hsl(148 64% 36%)",
+  "hsl(200 80% 44%)",
+  "hsl(280 58% 54%)",
+];
 
-interface Stats {
-  totalFeedbacks: number;
-  resolvedFeedbacks: number;
-  pendingFeedbacks: number;
-  totalVotes: number;
-  totalObjects: number;
-  totalReviews: number;
-  totalSolutionRatings: number;
-  avgSolutionRating: number;
+interface TooltipPayloadItem {
+  fill?: string;
+  color?: string;
+  name?: string;
+  value?: number | string;
 }
 
-interface TypeData {
-  name: string;
-  value: number;
+function DarkTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div
+      style={{
+        background: "white",
+        border: "1px solid hsl(214 20% 88%)",
+        borderRadius: "8px",
+        padding: "10px 14px",
+        fontSize: "12px",
+        color: "hsl(215 30% 12%)",
+        boxShadow: "0 4px 12px hsl(215 30% 12% / 0.1)",
+      }}
+    >
+      {label && (
+        <p
+          style={{
+            color: "hsl(215 14% 48%)",
+            fontSize: "11px",
+            marginBottom: "4px",
+            fontWeight: 600,
+          }}
+        >
+          {label}
+        </p>
+      )}
+      {payload.map((item, index) => (
+        <p key={index} style={{ color: item.fill || item.color || "hsl(221 83% 47%)" }}>
+          {item.name ? `${item.name}: ` : ""}
+          <strong>{item.value}</strong>
+        </p>
+      ))}
+    </div>
+  );
 }
 
-interface DistrictData {
-  name: string;
-  value: number;
-}
-
-interface StatusData {
-  name: string;
-  value: number;
-  color: string;
+function BigStat({
+  value,
+  label,
+  sub,
+  color = "hsl(221 83% 47%)",
+  delay = "0s",
+}: {
+  value: string | number;
+  label: string;
+  sub?: string;
+  color?: string;
+  delay?: string;
+}) {
+  return (
+    <div
+      className="animate-slide-up rounded-xl border border-border bg-white p-5 flex flex-col gap-1 transition-all hover:shadow-md"
+      style={{ animationDelay: delay }}
+    >
+      <span className="text-3xl font-bold leading-none" style={{ color }}>
+        {value}
+      </span>
+      <span className="mt-1 text-xs font-semibold text-muted-foreground">{label}</span>
+      {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
+    </div>
+  );
 }
 
 export default function Statistics() {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<Stats>({
-    totalFeedbacks: 0,
-    resolvedFeedbacks: 0,
-    pendingFeedbacks: 0,
-    totalVotes: 0,
-    totalObjects: 0,
-    totalReviews: 0,
-    totalSolutionRatings: 0,
-    avgSolutionRating: 0,
-  });
-  const [typeData, setTypeData] = useState<TypeData[]>([]);
-  const [districtData, setDistrictData] = useState<DistrictData[]>([]);
-  const [statusData, setStatusData] = useState<StatusData[]>([]);
+  const [overview, setOverview] = useState<GeoasrOverview | null>(null);
 
   useEffect(() => {
-    fetchStatistics();
+    let mounted = true;
+
+    const load = async () => {
+      setLoading(true);
+
+      try {
+        const data = await fetchGeoasrOverview();
+        if (mounted) {
+          setOverview(data);
+        }
+      } catch (error) {
+        console.error("Statistics fetch error:", error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const fetchStatistics = async () => {
-    setLoading(true);
-
-    try {
-      // Fetch feedbacks
-      const { data: feedbacks } = await supabase
-        .from('feedbacks')
-        .select('status, issue_type, votes');
-
-      // Fetch infrastructure objects with district info
-      const { data: objects } = await supabase
-        .from('infrastructure_objects')
-        .select('district');
-
-      // Fetch reviews count
-      const { count: reviewsCount } = await supabase
-        .from('reviews')
-        .select('*', { count: 'exact', head: true });
-
-      // Fetch solution ratings
-      const { data: solutionRatings } = await supabase
-        .from('solution_ratings')
-        .select('rating');
-
-      if (feedbacks) {
-        const total = feedbacks.length;
-        const resolved = feedbacks.filter(f => f.status === 'completed').length;
-        const pending = feedbacks.filter(f => f.status !== 'completed' && f.status !== 'rejected').length;
-        const votes = feedbacks.reduce((sum, f) => sum + (f.votes || 0), 0);
-        const reviewing = feedbacks.filter(f => f.status === 'reviewing').length;
-        const inProgress = feedbacks.filter(f => f.status === 'in_progress').length;
-        const submitted = feedbacks.filter(f => f.status === 'submitted').length;
-        const rejected = feedbacks.filter(f => f.status === 'rejected').length;
-
-        // Calculate solution rating stats
-        const totalSolutionRatings = solutionRatings?.length || 0;
-        const avgSolutionRating = totalSolutionRatings > 0
-          ? solutionRatings!.reduce((sum, r) => sum + r.rating, 0) / totalSolutionRatings
-          : 0;
-
-        setStats({
-          totalFeedbacks: total,
-          resolvedFeedbacks: resolved,
-          pendingFeedbacks: pending,
-          totalVotes: votes,
-          totalObjects: objects?.length || 0,
-          totalReviews: reviewsCount || 0,
-          totalSolutionRatings,
-          avgSolutionRating,
-        });
-
-        // Status distribution
-        setStatusData([
-          { name: "Qabul qilindi", value: submitted, color: "#eab308" },
-          { name: "Ko'rib chiqilmoqda", value: reviewing, color: "#3b82f6" },
-          { name: "Amalga oshirilmoqda", value: inProgress, color: "#a855f7" },
-          { name: "Bajarildi", value: resolved, color: "#22c55e" },
-          { name: "Rad etildi", value: rejected, color: "#ef4444" },
-        ].filter(s => s.value > 0));
-
-        // Group by issue type
-        const typeGroups: Record<string, number> = {};
-        feedbacks.forEach(f => {
-          const type = f.issue_type;
-          typeGroups[type] = (typeGroups[type] || 0) + 1;
-        });
-
-        const typeDataArray = Object.entries(typeGroups)
-          .map(([key, value]) => ({
-            name: issueTypeLabels[key as IssueType] || key,
-            value,
-          }))
-          .sort((a, b) => b.value - a.value);
-
-        setTypeData(typeDataArray);
-      }
-
-      if (objects) {
-        // Group by district
-        const districtGroups: Record<string, number> = {};
-        objects.forEach(obj => {
-          const district = obj.district?.replace(' tumani', '') || "Noma'lum";
-          districtGroups[district] = (districtGroups[district] || 0) + 1;
-        });
-
-        const districtDataArray = Object.entries(districtGroups)
-          .map(([name, value]) => ({ name, value }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 8);
-
-        setDistrictData(districtDataArray);
-      }
-    } catch (error) {
-      console.error('Error fetching statistics:', error);
-    } finally {
-      setLoading(false);
+  const derived = useMemo(() => {
+    if (!overview) {
+      return null;
     }
-  };
 
-  const satisfactionRate = stats.totalFeedbacks > 0 
-    ? Math.round((stats.resolvedFeedbacks / stats.totalFeedbacks) * 100) 
-    : 0;
+    const regionData = overview.regionBreakdown
+      .filter((region) => region.totalObjects > 0)
+      .slice(0, 8)
+      .map((region) => ({
+        name: region.region.replace(" viloyati", ""),
+        value: region.issueObjects,
+        total: region.totalObjects,
+      }));
+
+    const datasetIssueData = overview.datasetSummary.map((dataset, index) => ({
+      name: dataset.label,
+      value: dataset.issueObjects,
+      color: CHART_COLORS[index % CHART_COLORS.length],
+    }));
+
+    const mostAffectedRegion =
+      overview.regionBreakdown.find((region) => region.issueObjects > 0) ?? null;
+
+    const averageIssueLoad =
+      overview.issueObjects > 0
+        ? (overview.issueOccurrences / overview.issueObjects).toFixed(1)
+        : "0.0";
+
+    const healthyRate =
+      overview.totalObjects > 0
+        ? Math.round((overview.healthyObjects / overview.totalObjects) * 100)
+        : 0;
+
+    return {
+      regionData,
+      datasetIssueData,
+      mostAffectedRegion,
+      averageIssueLoad,
+      healthyRate,
+    };
+  }, [overview]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center justify-center gap-3 py-28">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">Yuklanmoqda...</span>
         </div>
       </div>
     );
   }
 
+  if (!overview || !derived) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container-gov py-12 text-center text-sm text-muted-foreground">
+          Statistik ma'lumotlarni yuklab bo'lmadi.
+        </div>
+      </div>
+    );
+  }
+
+  const schoolSummary = overview.datasetSummary.find((item) => item.type === "maktab");
+  const kindergartenSummary = overview.datasetSummary.find(
+    (item) => item.type === "bogcha",
+  );
+  const healthSummary = overview.datasetSummary.find((item) => item.type === "ssv");
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Header />
-      
-      {/* Page Header */}
-      <section className="bg-card border-b py-6 sm:py-8">
+
+      <section className="bg-primary px-4 py-6 text-white">
         <div className="container-gov">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            {t('statistics.title')}
-          </h1>
-          <p className="text-muted-foreground">
-            {t('statistics.subtitle')}
-          </p>
+          <h1 className="mb-1 text-2xl font-bold">{t("statistics.title")}</h1>
+          <p className="text-sm text-white/75">{t("statistics.subtitle")}</p>
         </div>
       </section>
 
-      {/* Stats Cards */}
-      <section className="py-6">
-        <div className="container-gov">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-            <StatCard
-              title="Jami murojaatlar"
-              value={stats.totalFeedbacks}
-              icon={MessageSquare}
+      <div className="container-gov space-y-8 py-6">
+        {Object.keys(overview.errors).length > 0 && (
+          <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Ayrim GEOASR manbalari vaqtincha ishlamadi. Statistikalar mavjud
+              bo'lgan ma'lumotlar asosida hisoblandi.
+            </span>
+          </div>
+        )}
+
+        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div className="flex items-center gap-2.5">
+              <MapPin className="h-4 w-4 shrink-0 text-primary" />
+              <span className="text-sm font-semibold">Prioritet xarita</span>
+            </div>
+            <span className="text-xs text-muted-foreground">Viloyat → tuman → ob'ekt ko'rinishi</span>
+          </div>
+          <div className="p-4">
+            <PriorityMap />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
+            Asosiy ko'rsatkichlar
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <BigStat
+              value={overview.totalObjects}
+              label="Jami ob'ektlar"
+              sub="3 ta GEOASR manbasi"
+              color="hsl(221 83% 47%)"
             />
-            <StatCard
-              title="Hal qilingan"
-              value={stats.resolvedFeedbacks}
-              subtitle={stats.totalFeedbacks > 0 ? `${satisfactionRate}% hal qilindi` : "Hali murojaatlar yo'q"}
-              icon={CheckCircle2}
-              variant="success"
+            <BigStat
+              value={overview.issueObjects}
+              label="Muammoli ob'ektlar"
+              sub={`${overview.affectedRegions} ta hududda aniqlangan`}
+              color="hsl(3 78% 54%)"
+              delay="0.08s"
             />
-            <StatCard
-              title="Ko'rib chiqilmoqda"
-              value={stats.pendingFeedbacks}
-              icon={Clock}
-              variant="warning"
+            <BigStat
+              value={overview.healthyObjects}
+              label="Barqaror holat"
+              sub={`${derived.healthyRate}% ob'ekt joriy xavfsiz zonada`}
+              color="hsl(152 65% 46%)"
+              delay="0.16s"
             />
-            <StatCard
-              title="Jami ovozlar"
-              value={stats.totalVotes}
-              subtitle={`${stats.totalObjects} ta ob'ekt`}
-              icon={ThumbsUp}
-              variant="info"
+            <BigStat
+              value={overview.issueOccurrences}
+              label="Jami muammo holati"
+              sub={`${derived.averageIssueLoad} ta muammo / ob'ekt`}
+              color="hsl(39 96% 56%)"
+              delay="0.24s"
             />
           </div>
+        </div>
 
-          {/* Additional Stats */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.totalObjects}</p>
-                    <p className="text-sm text-muted-foreground">Jami ob'ektlar</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                    <MessageSquare className="h-6 w-6 text-yellow-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.totalReviews}</p>
-                    <p className="text-sm text-muted-foreground">Jami sharhlar</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                    <CheckCircle2 className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{satisfactionRate}%</p>
-                    <p className="text-sm text-muted-foreground">Hal qilish darajasi</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                    <Star className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {stats.avgSolutionRating > 0 ? stats.avgSolutionRating.toFixed(1) : "-"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Yechim baholari ({stats.totalSolutionRatings})
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div>
+          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
+            Manbalar kesimida
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <BigStat
+              value={schoolSummary?.total ?? 0}
+              label={GEOASR_DATASET_LABELS.maktab}
+              sub={`${schoolSummary?.issueObjects ?? 0} ta muammoli ob'ekt`}
+              color="hsl(221 83% 47%)"
+            />
+            <BigStat
+              value={kindergartenSummary?.total ?? 0}
+              label={GEOASR_DATASET_LABELS.bogcha}
+              sub={`${kindergartenSummary?.issueObjects ?? 0} ta muammoli ob'ekt`}
+              color="hsl(280 58% 54%)"
+              delay="0.08s"
+            />
+            <BigStat
+              value={healthSummary?.total ?? 0}
+              label={GEOASR_DATASET_LABELS.ssv}
+              sub={`${healthSummary?.issueObjects ?? 0} ta muammoli ob'ekt`}
+              color="hsl(3 78% 54%)"
+              delay="0.16s"
+            />
+            <BigStat
+              value={derived.mostAffectedRegion?.issueObjects ?? 0}
+              label="Eng yuklangan hudud"
+              sub={derived.mostAffectedRegion?.region ?? "Ma'lumot yo'q"}
+              color="hsl(175 65% 36%)"
+              delay="0.24s"
+            />
           </div>
+        </div>
 
-          {/* Charts */}
-          <div className="grid gap-6 lg:grid-cols-2 mb-6">
-            {/* Issue Types Pie */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <AlertCircle className="h-5 w-5 text-primary" />
-                  Muammo turlari bo'yicha murojaatlar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {typeData.length === 0 ? (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    Hali murojaatlar yo'q
-                  </div>
-                ) : (
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={typeData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={100}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}`}
-                        >
-                          {typeData.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Status Distribution Pie */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  Murojaatlar holati
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {statusData.length === 0 ? (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    Ma'lumot yo'q
-                  </div>
-                ) : (
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={100}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}`}
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Districts Bar */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Building2 className="h-5 w-5 text-primary" />
-                Tumanlar bo'yicha ob'ektlar
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {districtData.length === 0 ? (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  Ma'lumot yo'q
-                </div>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+            <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+              <AlertCircle className="h-4 w-4 shrink-0 text-primary" />
+              <span className="text-sm font-semibold">Muammo turlari bo'yicha holat</span>
+            </div>
+            <div className="p-5">
+              {overview.issueTypeBreakdown.length === 0 ? (
+                <EmptyChart />
               ) : (
-                <div className="h-[350px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={districtData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={80} />
-                      <YAxis />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Bar 
-                        dataKey="value" 
-                        fill="hsl(var(--primary))" 
-                        radius={[4, 4, 0, 0]}
-                        name="Ob'ektlar soni"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                <>
+                  <div className="h-[280px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={overview.issueTypeBreakdown}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={100}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {overview.issueTypeBreakdown.map((_, index) => (
+                            <Cell
+                              key={index}
+                              fill={CHART_COLORS[index % CHART_COLORS.length]}
+                              stroke="hsl(222 30% 11%)"
+                              strokeWidth={2}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<DarkTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
 
-          {/* No data message */}
-          {stats.totalFeedbacks === 0 && (
-            <Card className="mt-6">
-              <CardContent className="py-12 text-center">
-                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">Hali murojaatlar yo'q</h3>
-                <p className="text-sm text-muted-foreground">
-                  Fuqarolar murojaat yuborgandan so'ng bu yerda statistik ma'lumotlar ko'rinadi
-                </p>
-              </CardContent>
-            </Card>
-          )}
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {overview.issueTypeBreakdown.map((item, index) => (
+                      <div key={item.type} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-2.5 w-2.5 rounded-sm shrink-0"
+                            style={{ background: CHART_COLORS[index % CHART_COLORS.length] }}
+                          />
+                          <span className="max-w-[180px] truncate text-xs text-muted-foreground">
+                            {item.label}
+                          </span>
+                        </div>
+                        <span
+                          className="text-xs font-semibold"
+                          style={{ color: CHART_COLORS[index % CHART_COLORS.length] }}
+                        >
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+            <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+              <TrendingUp className="h-4 w-4 shrink-0 text-accent" />
+              <span className="text-sm font-semibold">Muammoli ob'ektlar manba bo'yicha</span>
+            </div>
+            <div className="p-5">
+              {derived.datasetIssueData.every((item) => item.value === 0) ? (
+                <EmptyChart />
+              ) : (
+                <>
+                  <div className="h-[280px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={derived.datasetIssueData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={100}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {derived.datasetIssueData.map((item, index) => (
+                            <Cell
+                              key={item.name}
+                              fill={item.color}
+                              stroke="hsl(222 30% 11%)"
+                              strokeWidth={2}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<DarkTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {derived.datasetIssueData.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-2.5 w-2.5 rounded-sm shrink-0"
+                            style={{ background: item.color }}
+                          />
+                          <span className="text-xs text-muted-foreground">{item.name}</span>
+                        </div>
+                        <span className="text-xs font-semibold" style={{ color: item.color }}>
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </section>
+
+        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+          <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+            <Building2 className="h-4 w-4 shrink-0 text-primary" />
+            <span className="text-sm font-semibold">Hududlar bo'yicha muammoli ob'ektlar</span>
+          </div>
+          <div className="p-5">
+            {derived.regionData.length === 0 ? (
+              <EmptyChart />
+            ) : (
+              <div className="h-[320px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={derived.regionData} margin={{ top: 4, right: 4, left: -16, bottom: 60 }}>
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      stroke="hsl(222 22% 20%)"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fill: "hsl(215 14% 48%)", fontSize: 11 }}
+                      axisLine={{ stroke: "hsl(214 20% 88%)" }}
+                      tickLine={false}
+                      angle={-38}
+                      textAnchor="end"
+                      height={72}
+                    />
+                    <YAxis
+                      tick={{ fill: "hsl(215 14% 48%)", fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      content={<DarkTooltip />}
+                      cursor={{ fill: "hsl(222 22% 19% / 0.5)" }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      name="Muammoli ob'ektlar"
+                      fill="hsl(221 83% 47%)"
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={48}
+                    >
+                      {derived.regionData.map((_, index) => (
+                        <Cell
+                          key={index}
+                          fill={`hsl(221 83% ${47 + index * 3}% / ${1 - index * 0.06})`}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {overview.totalObjects === 0 && (
+          <div className="rounded-xl border border-border bg-white p-12 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+              <ShieldCheck className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="mb-1.5 text-base font-semibold">Hali ma'lumot yo'q</h3>
+            <p className="mx-auto max-w-xs text-sm text-muted-foreground">
+              GEOASR ma'lumotlari qayta yuklangandan so'ng bu yerda hududlar
+              kesimidagi statistikalar ko'rinadi.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EmptyChart() {
+  return (
+    <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-muted-foreground">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-border">
+        <span className="text-xs font-medium">0</span>
+      </div>
+      <span className="text-xs text-muted-foreground">Ma'lumot yo'q</span>
     </div>
   );
 }

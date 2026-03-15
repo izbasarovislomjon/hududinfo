@@ -12,8 +12,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 3500);
-
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -27,102 +26,173 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     <AnimatePresence onExitComplete={handleAnimationComplete}>
       {isVisible && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-green-500"
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
+          style={{ background: "#ffffff" }}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          transition={{ duration: 0.45, ease: "easeInOut" }}
         >
-          {/* Background decorations */}
-          <div className="absolute inset-0 overflow-hidden">
-            <motion.div
-              className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-white/10 rounded-full blur-3xl"
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.3, 0.5, 0.3],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-              className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-green-400/20 rounded-full blur-3xl"
-              animate={{
-                scale: [1.2, 1, 1.2],
-                opacity: [0.3, 0.5, 0.3],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          </div>
+          {/* Subtle background circles */}
+          <motion.div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: 560,
+              height: 560,
+              top: "50%",
+              left: "50%",
+              x: "-50%",
+              y: "-50%",
+              background:
+                "radial-gradient(circle, hsl(221 83% 47% / 0.07) 0%, transparent 70%)",
+            }}
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: 320,
+              height: 320,
+              bottom: "15%",
+              right: "10%",
+              background:
+                "radial-gradient(circle, hsl(175 65% 36% / 0.06) 0%, transparent 70%)",
+            }}
+            animate={{ scale: [1.1, 1, 1.1] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+          />
 
-          <div className="relative flex flex-col items-center justify-center px-6">
-            {/* Logo container */}
+          {/* Decorative ring */}
+          <motion.div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: 320,
+              height: 320,
+              border: "1px solid hsl(221 83% 47% / 0.1)",
+              top: "50%",
+              left: "50%",
+              x: "-50%",
+              y: "-50%",
+            }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: 240,
+              height: 240,
+              border: "1px dashed hsl(175 65% 36% / 0.12)",
+              top: "50%",
+              left: "50%",
+              x: "-50%",
+              y: "-50%",
+            }}
+            animate={{ rotate: -360 }}
+            transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+          />
+
+          {/* Main content */}
+          <div className="relative z-10 flex flex-col items-center px-8">
+            {/* Logo */}
             <motion.div
-              className="relative"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
+              initial={{ opacity: 0, scale: 0.82, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{
                 type: "spring",
-                stiffness: 200,
+                stiffness: 180,
                 damping: 20,
-                delay: 0.2,
+                delay: 0.15,
               }}
+              className="relative mb-6"
             >
-              <motion.div
-                className="absolute inset-0 bg-white/30 rounded-3xl blur-xl"
-                animate={{
-                  scale: [1, 1.1, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
+              {/* Soft shadow behind logo */}
+              <div
+                className="absolute inset-0 rounded-2xl"
+                style={{
+                  background: "hsl(221 83% 47% / 0.12)",
+                  filter: "blur(20px)",
+                  transform: "scale(0.9) translateY(8px)",
                 }}
               />
-              <motion.img
+              <img
                 src={logo}
                 alt="HududInfo.uz"
-                className="relative w-80 h-auto max-w-[90vw] rounded-2xl shadow-2xl bg-white p-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
+                className="relative rounded-2xl"
+                style={{
+                  width: 220,
+                  height: "auto",
+                  boxShadow:
+                    "0 8px 32px hsl(221 83% 47% / 0.15), 0 2px 8px hsl(215 30% 12% / 0.08)",
+                }}
+                draggable={false}
               />
             </motion.div>
 
             {/* Tagline */}
             <motion.p
-              className="mt-8 text-white/90 text-lg md:text-xl font-medium text-center"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.5 }}
+              transition={{ delay: 0.7, duration: 0.4 }}
+              style={{
+                fontSize: "13px",
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                fontWeight: 500,
+                color: "hsl(215 14% 52%)",
+                textAlign: "center",
+                marginBottom: "2rem",
+                letterSpacing: "0.01em",
+              }}
             >
               Hududlar infratuzilmasi monitoring tizimi
             </motion.p>
 
-            {/* Loading indicator */}
+            {/* Progress bar */}
             <motion.div
-              className="mt-8 flex gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
+              transition={{ delay: 0.85 }}
+              className="relative overflow-hidden rounded-full"
+              style={{
+                width: 180,
+                height: 3,
+                background: "hsl(214 20% 90%)",
+              }}
+            >
+              <motion.div
+                className="absolute inset-y-0 left-0 rounded-full"
+                style={{ background: "hsl(221 83% 47%)" }}
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{
+                  delay: 0.95,
+                  duration: 1.8,
+                  ease: "easeInOut",
+                }}
+              />
+            </motion.div>
+
+            {/* Dot indicators */}
+            <motion.div
+              className="flex gap-1.5 mt-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
             >
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-3 h-3 bg-white rounded-full"
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.5, 1, 0.5],
+                  className="rounded-full"
+                  style={{
+                    width: 5,
+                    height: 5,
+                    background: "hsl(221 83% 47%)",
                   }}
+                  animate={{ opacity: [0.25, 1, 0.25] }}
                   transition={{
-                    duration: 0.8,
+                    duration: 1.0,
                     repeat: Infinity,
-                    delay: i * 0.2,
+                    delay: i * 0.28,
                     ease: "easeInOut",
                   }}
                 />

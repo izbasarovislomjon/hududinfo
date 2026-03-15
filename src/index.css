@@ -2,246 +2,347 @@
 @tailwind components;
 @tailwind utilities;
 
-/* HududInfo.uz Design System - Government Services Style */
+/* HududInfo.uz — Clean Light Theme */
 
 @layer base {
-  :root {
-    /* Government Trust Blue Palette */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    :root {
+        --background: 210 22% 96%;
+        --foreground: 215 30% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+        --card: 0 0% 100%;
+        --card-foreground: 215 30% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 215 30% 12%;
 
-    /* Primary - Deep Government Blue */
-    --primary: 215 70% 35%;
-    --primary-foreground: 0 0% 100%;
+        /* Primary — Professional Blue */
+        --primary: 221 83% 47%;
+        --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Light Blue Gray */
-    --secondary: 210 25% 93%;
-    --secondary-foreground: 215 25% 20%;
+        /* Secondary */
+        --secondary: 210 22% 92%;
+        --secondary-foreground: 215 25% 22%;
 
-    /* Muted */
-    --muted: 210 20% 94%;
-    --muted-foreground: 215 15% 45%;
+        /* Muted */
+        --muted: 210 20% 93%;
+        --muted-foreground: 215 14% 48%;
 
-    /* Accent - Teal */
-    --accent: 175 60% 40%;
-    --accent-foreground: 0 0% 100%;
+        /* Accent — Neutral blue-gray (no green/teal) */
+        --accent: 220 14% 92%;
+        --accent-foreground: 215 25% 22%;
 
-    /* Status Colors */
-    --success: 145 65% 35%;
-    --success-foreground: 0 0% 100%;
-    
-    --warning: 35 90% 50%;
-    --warning-foreground: 0 0% 100%;
-    
-    --info: 200 80% 45%;
-    --info-foreground: 0 0% 100%;
+        /* Status */
+        --success: 148 64% 36%;
+        --success-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 100%;
+        --warning: 36 90% 48%;
+        --warning-foreground: 0 0% 100%;
 
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 215 70% 35%;
+        --info: 200 80% 44%;
+        --info-foreground: 0 0% 100%;
 
-    --radius: 0.625rem;
+        --destructive: 3 78% 54%;
+        --destructive-foreground: 0 0% 100%;
 
-    /* Map Colors */
-    --map-school: 215 70% 50%;
-    --map-kindergarten: 280 60% 55%;
-    --map-clinic: 0 70% 55%;
-    --map-water: 195 80% 45%;
-    --map-road: 35 70% 50%;
+        --border: 214 20% 88%;
+        --input: 214 20% 92%;
+        --ring: 221 83% 47%;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(215 70% 35%) 0%, hsl(215 70% 25%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(175 60% 40%) 0%, hsl(195 70% 45%) 100%);
+        --radius: 0.75rem;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(215 25% 15% / 0.08), 0 2px 4px -2px hsl(215 25% 15% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(215 25% 15% / 0.1), 0 4px 6px -4px hsl(215 25% 15% / 0.08);
-    --shadow-xl: 0 20px 25px -5px hsl(215 25% 15% / 0.1), 0 8px 10px -6px hsl(215 25% 15% / 0.08);
+        /* Map / Object Type Colors */
+        --map-school: 221 83% 50%;
+        --map-kindergarten: 280 58% 54%;
+        --map-clinic: 3 78% 54%;
+        --map-water: 196 80% 42%;
+        --map-road: 36 90% 48%;
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 25% 15%;
-    --sidebar-primary: 215 70% 35%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 25% 93%;
-    --sidebar-accent-foreground: 215 25% 20%;
-    --sidebar-border: 210 20% 88%;
-    --sidebar-ring: 215 70% 35%;
-  }
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 hsl(215 30% 12% / 0.06);
+        --shadow-md:
+            0 4px 12px -1px hsl(215 30% 12% / 0.1),
+            0 2px 4px -1px hsl(215 30% 12% / 0.06);
+        --shadow-lg:
+            0 10px 28px -3px hsl(215 30% 12% / 0.12),
+            0 4px 8px -2px hsl(215 30% 12% / 0.06);
+        --shadow-xl: 0 20px 40px -5px hsl(215 30% 12% / 0.14);
 
-  .dark {
-    --background: 215 25% 10%;
-    --foreground: 210 20% 95%;
+        /* Sidebar */
+        --sidebar-background: 0 0% 100%;
+        --sidebar-foreground: 215 30% 12%;
+        --sidebar-primary: 221 83% 47%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 210 22% 92%;
+        --sidebar-accent-foreground: 215 25% 22%;
+        --sidebar-border: 214 20% 88%;
+        --sidebar-ring: 221 83% 47%;
+    }
 
-    --card: 215 25% 13%;
-    --card-foreground: 210 20% 95%;
-
-    --popover: 215 25% 13%;
-    --popover-foreground: 210 20% 95%;
-
-    --primary: 210 70% 55%;
-    --primary-foreground: 215 25% 10%;
-
-    --secondary: 215 20% 20%;
-    --secondary-foreground: 210 20% 90%;
-
-    --muted: 215 20% 18%;
-    --muted-foreground: 210 15% 60%;
-
-    --accent: 175 55% 45%;
-    --accent-foreground: 215 25% 10%;
-
-    --success: 145 60% 45%;
-    --success-foreground: 215 25% 10%;
-    
-    --warning: 35 85% 55%;
-    --warning-foreground: 215 25% 10%;
-    
-    --info: 200 75% 55%;
-    --info-foreground: 215 25% 10%;
-
-    --destructive: 0 65% 55%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 20% 22%;
-    --input: 215 20% 22%;
-    --ring: 210 70% 55%;
-
-    --sidebar-background: 215 25% 10%;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 210 70% 55%;
-    --sidebar-primary-foreground: 215 25% 10%;
-    --sidebar-accent: 215 20% 18%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 215 20% 22%;
-    --sidebar-ring: 210 70% 55%;
-  }
+    .dark {
+        --background: 215 28% 9%;
+        --foreground: 210 20% 94%;
+        --card: 215 24% 13%;
+        --card-foreground: 210 20% 94%;
+        --popover: 215 24% 13%;
+        --popover-foreground: 210 20% 94%;
+        --primary: 221 83% 58%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 215 22% 20%;
+        --secondary-foreground: 210 16% 82%;
+        --muted: 215 20% 17%;
+        --muted-foreground: 214 14% 52%;
+        --accent: 215 22% 20%;
+        --accent-foreground: 210 16% 88%;
+        --destructive: 3 78% 58%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 215 20% 22%;
+        --input: 215 22% 18%;
+        --ring: 221 83% 58%;
+        --sidebar-background: 215 28% 9%;
+        --sidebar-foreground: 210 20% 94%;
+        --sidebar-primary: 221 83% 58%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 215 22% 20%;
+        --sidebar-accent-foreground: 210 16% 82%;
+        --sidebar-border: 215 20% 22%;
+        --sidebar-ring: 221 83% 58%;
+    }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+    * {
+        @apply border-border;
+    }
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  }
+    body {
+        @apply bg-background text-foreground antialiased;
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
-  }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        @apply font-bold tracking-tight;
+    }
 }
 
 @layer components {
-  .container-gov {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
+    .container-gov {
+        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
 
-  .card-gov {
-    @apply bg-card rounded-lg border shadow-md;
-  }
+    .card-gov {
+        @apply bg-card rounded-xl border transition-all duration-200;
+        box-shadow: var(--shadow-md);
+    }
 
-  .btn-gov {
-    @apply inline-flex items-center justify-center rounded-md font-medium transition-all duration-200;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
-    @apply disabled:pointer-events-none disabled:opacity-50;
-  }
+    .card-accent {
+        @apply bg-card rounded-xl border transition-all duration-200;
+        border-left-width: 3px;
+        border-left-color: hsl(var(--primary));
+        box-shadow: var(--shadow-md);
+    }
 
-  .input-gov {
-    @apply flex h-12 w-full rounded-md border border-input bg-background px-4 py-3 text-base;
-    @apply ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium;
-    @apply placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2;
-    @apply focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-  }
+    .btn-gov {
+        @apply inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-150;
+        @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+        @apply disabled:pointer-events-none disabled:opacity-50;
+    }
 
-  .status-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium;
-  }
+    .input-gov {
+        @apply flex h-10 w-full rounded-lg border border-input bg-white px-3 py-2 text-sm;
+        @apply ring-offset-background placeholder:text-muted-foreground;
+        @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+        @apply disabled:cursor-not-allowed disabled:opacity-50;
+    }
 
-  .stat-card {
-    @apply bg-card rounded-xl p-6 border shadow-md transition-all duration-200 hover:shadow-lg;
-  }
+    .status-badge {
+        @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    }
 
-  /* Leaflet custom styles */
-  .leaflet-container {
-    @apply rounded-lg;
-    font-family: inherit;
-  }
+    .stat-card {
+        @apply bg-card rounded-xl p-4 border transition-all duration-200 hover:shadow-md;
+    }
 
-  .leaflet-popup-content-wrapper {
-    @apply rounded-lg shadow-lg border-0;
-  }
+    /* Leaflet overrides for light theme */
+    .leaflet-container {
+        @apply rounded-xl;
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
+    }
 
-  .leaflet-popup-content {
-    @apply m-0 p-4;
-  }
+    .leaflet-popup-content-wrapper {
+        @apply rounded-xl;
+        box-shadow: var(--shadow-lg) !important;
+        border: 1px solid hsl(var(--border)) !important;
+    }
 
-  .custom-marker {
-    @apply flex items-center justify-center rounded-full shadow-lg border-2 border-white;
-  }
+    .leaflet-popup-content {
+        @apply m-0 p-4;
+    }
+
+    .leaflet-control-zoom a {
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
+    }
+
+    .leaflet-top,
+    .leaflet-bottom,
+    .leaflet-pane,
+    .leaflet-control {
+        z-index: 400 !important;
+    }
+
+    .leaflet-interactive:focus,
+    .leaflet-marker-icon:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .custom-marker {
+        @apply flex items-center justify-center rounded-full shadow-md;
+        border: 2px solid white;
+    }
+
+    /* Bottom nav safe area */
+    .bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Page bottom padding to clear bottom nav on mobile */
+    .page-content {
+        @apply pb-20 md:pb-6;
+    }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
+    .text-balance {
+        text-wrap: balance;
     }
-    to {
-      opacity: 1;
-    }
-  }
 
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
     }
-  }
 
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
+    .safe-top {
+        padding-top: env(safe-area-inset-top, 0px);
     }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
 
-  .glass-effect {
-    @apply bg-white/80 backdrop-blur-md;
-  }
+    .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Animations */
+    .animate-fade-in {
+        animation: fadeIn 0.35s ease-out both;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.4s ease-out both;
+    }
+
+    .animate-slide-up-delay-1 {
+        animation: slideUp 0.4s 0.07s ease-out both;
+    }
+
+    .animate-slide-up-delay-2 {
+        animation: slideUp 0.4s 0.14s ease-out both;
+    }
+
+    .animate-slide-up-delay-3 {
+        animation: slideUp 0.4s 0.21s ease-out both;
+    }
+
+    .animate-slide-up-delay-4 {
+        animation: slideUp 0.4s 0.28s ease-out both;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.25s ease-out both;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.94);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes shimmer {
+        from {
+            background-position: -200% 0;
+        }
+        to {
+            background-position: 200% 0;
+        }
+    }
+
+    @keyframes bounceSoft {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
+    .glass-effect {
+        background: hsl(0 0% 100% / 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid hsl(var(--border));
+    }
+
+    /* Type color utilities */
+    .type-school {
+        color: hsl(221 83% 50%);
+        background-color: hsl(221 83% 50% / 0.1);
+    }
+    .type-kindergarten {
+        color: hsl(280 58% 54%);
+        background-color: hsl(280 58% 54% / 0.1);
+    }
+    .type-clinic {
+        color: hsl(3 78% 54%);
+        background-color: hsl(3 78% 54% / 0.1);
+    }
+    .type-water {
+        color: hsl(196 80% 42%);
+        background-color: hsl(196 80% 42% / 0.1);
+    }
+    .type-road {
+        color: hsl(36 90% 48%);
+        background-color: hsl(36 90% 48% / 0.1);
+    }
 }

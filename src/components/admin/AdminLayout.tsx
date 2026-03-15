@@ -1,63 +1,35 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AdminSidebar } from "./AdminSidebar";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user, isAdmin, activateAdminDemo } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate("/admin/login");
-        return;
-      }
-
-      // Check if user has admin role
-      const { data: hasRole } = await supabase.rpc("has_role", {
-        _user_id: session.user.id,
-        _role: "admin",
-      });
-
-      if (!hasRole) {
-        navigate("/admin/login");
-        return;
-      }
-
-      setIsAdmin(true);
-      setLoading(false);
-    };
-
-    checkAdmin();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        navigate("/admin/login");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  if (loading) {
+  if (!user || !isAdmin) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <div className="max-w-md rounded-2xl border border-border bg-white p-6 text-center shadow-sm">
+          <h1 className="text-xl font-bold mb-2">Admin kirishi talab qilinadi</h1>
+          <p className="text-sm text-muted-foreground mb-5">
+            Boshqaruv paneli faqat admin hisob orqali ishlaydi.
+          </p>
+          <Button
+            onClick={async () => {
+              await activateAdminDemo();
+              navigate("/admin");
+            }}
+          >
+            Admin demo ochish
+          </Button>
+        </div>
       </div>
     );
-  }
-
-  if (!isAdmin) {
-    return null;
   }
 
   return (

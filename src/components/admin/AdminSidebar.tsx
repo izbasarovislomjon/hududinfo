@@ -3,21 +3,16 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   MessageSquare,
-  Users,
-  BarChart3,
-  School,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Shield,
   Newspaper,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
   {
@@ -31,29 +26,9 @@ const menuItems = [
     icon: MessageSquare,
   },
   {
-    title: "Foydalanuvchilar",
-    href: "/admin/users",
-    icon: Users,
-  },
-  {
-    title: "Obyektlar",
-    href: "/admin/objects",
-    icon: School,
-  },
-  {
     title: "Yangiliklar",
     href: "/admin/news",
     icon: Newspaper,
-  },
-  {
-    title: "Byudjet",
-    href: "/admin/budget",
-    icon: Wallet,
-  },
-  {
-    title: "Statistika",
-    href: "/admin/statistics",
-    icon: BarChart3,
   },
 ];
 
@@ -62,10 +37,12 @@ export function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { activateGuestDemo, setMode } = useAuth();
+
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast.success("Tizimdan chiqdingiz");
-    navigate("/admin/login");
+    await activateGuestDemo();
+    setMode('user');
+    navigate("/");
   };
 
   return (
@@ -118,10 +95,10 @@ export function AdminSidebar() {
             "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
             collapsed && "justify-center px-0"
           )}
-          onClick={handleLogout}
+          onClick={() => void handleLogout()}
         >
           <LogOut className="h-5 w-5" />
-          {!collapsed && <span>Chiqish</span>}
+          {!collapsed && <span>Fuqaro demo</span>}
         </Button>
 
         <Button
